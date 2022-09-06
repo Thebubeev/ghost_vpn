@@ -28,7 +28,7 @@ class _SplashStartScreenState extends State<SplashStartScreen> {
   }
 
   Future<void> init() async {
-    await Future.delayed(const Duration(seconds: 7)).then((_) {
+    await Future.delayed(const Duration(seconds: 5)).then((_) {
       prefs.setWelcome(true);
       Navigator.push(context,
           MaterialPageRoute(builder: ((context) => const VpnMainScreen())));

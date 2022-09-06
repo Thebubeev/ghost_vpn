@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ghost_vpn/bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/screens/main_screen.dart';
 
@@ -11,9 +13,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-        onGenerateRoute: RoutesGenerator.generateRoute,
-        debugShowCheckedModeBanner: false,
-        home: MainScreen());
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<VpnBloc>(create: (_)=> VpnBloc())
+      ],
+      child: const MaterialApp(
+          onGenerateRoute: RoutesGenerator.generateRoute,
+          debugShowCheckedModeBanner: false,
+          home: MainScreen()),
+    );
   }
 }
