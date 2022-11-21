@@ -5,6 +5,12 @@ abstract class VpnEvent {}
 
 class VpnInitialize extends VpnEvent {}
 
-class VpnConnect extends VpnEvent {}
+class VpnConnect extends VpnEvent {
+  final OpenVPN openVPN;
+  VpnConnect({required this.openVPN});
+}
 
-class VpnDisconnect extends VpnEvent {}
+class VpnDisconnect extends VpnEvent {
+  final OpenVPN openVPN;
+  VpnDisconnect({required this.openVPN});
+}

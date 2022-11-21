@@ -10,7 +10,7 @@ class SharedPreferenceStorage {
     await prefs.setBool(Constants.welcome, welcome);
   }
 
-  Future<bool> getWelcome() async {
+   getWelcome() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(Constants.welcome);
   }

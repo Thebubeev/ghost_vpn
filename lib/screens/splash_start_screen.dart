@@ -3,7 +3,7 @@ import 'package:ghost_vpn/screens/vpn_main_screen.dart';
 import 'package:ghost_vpn/services/shared_preferences_storage.dart';
 
 class SplashStartScreen extends StatefulWidget {
-  const SplashStartScreen({Key key}) : super(key: key);
+  const SplashStartScreen({Key? key}) : super(key: key);
 
   @override
   State<SplashStartScreen> createState() => _SplashStartScreenState();
@@ -28,7 +28,7 @@ class _SplashStartScreenState extends State<SplashStartScreen> {
   }
 
   Future<void> init() async {
-    await Future.delayed(const Duration(seconds: 5)).then((_) {
+    await Future.delayed(const Duration(seconds: 3)).then((_) {
       prefs.setWelcome(true);
       Navigator.push(context,
           MaterialPageRoute(builder: ((context) => const VpnMainScreen())));

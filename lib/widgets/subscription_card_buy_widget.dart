@@ -7,12 +7,12 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
   final String textButton;
   final bool isBackButton;
   const SubscriptionCardBuyWidget({
-    this.label,
-    this.imagePath,
-    this.text,
-    this.textButton,
-    this.isBackButton,
-    Key key,
+    required this.label,
+    required this.imagePath,
+    required this.text,
+    required this.textButton,
+    required this.isBackButton,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -31,8 +31,10 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 19),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w300),
                       ),
                       IconButton(
                           onPressed: () {
@@ -47,7 +49,10 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
                   )
                 : Text(
                     label,
-                    style: const TextStyle(color: Colors.white, fontSize: 19),
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w300),
                   ),
             Image.asset(
               imagePath,
@@ -57,7 +62,8 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
             ),
             Text(
               text,
-              style: TextStyle(color: Colors.white),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.w300),
             ),
             const SizedBox(
               height: 10,

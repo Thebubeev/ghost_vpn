@@ -1,27 +1,30 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter_vpn/flutter_vpn.dart';
-import 'package:flutter_vpn/state.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 part 'vpn_event.dart';
 part 'vpn_state.dart';
 
 class VpnBloc extends Bloc<VpnEvent, VpnState> {
   VpnBloc() : super(VpnInitialState()) {
-    on<VpnInitialize>((event, emit) async{
-     await FlutterVpn.prepare();
-      FlutterVpn.onStateChanged.listen((currentState) {
-        emit(VpnDataState(flutterVpnState: currentState));
-      });
-    });
-
     on<VpnDisconnect>((event, emit) async {
-      //    await FlutterVpn.disconnect();
+      event.openVPN.disconnect();
       emit(VpnDisconnectedState(isConnected: false));
     });
 
     on<VpnConnect>((event, emit) async {
-      //  await FlutterVpn.connectIkev2EAP(server: '', username: '', password: '');
+      final config = await rootBundle.loadString('assets/__Admin2.txt');
+
+      event.openVPN.connect(
+        config,
+        'GhostVPN',
+        username: 'admin',
+        password: 'admin',
+        bypassPackages: [],
+        certIsRequired: false,
+      );
+
       emit(VpnConnectedState(isConnected: true));
     });
   }

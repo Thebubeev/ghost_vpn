@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ghost_vpn/widgets/subscription_card_buy_widget.dart';
 
 class SubscriptionScreen extends StatelessWidget {
-  const SubscriptionScreen({Key key}) : super(key: key);
+  const SubscriptionScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
