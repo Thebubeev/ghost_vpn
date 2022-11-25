@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "989673027494",
+    "project_id": "ghostvpn-ea207",
+    "storage_bucket": "ghostvpn-ea207.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989673027494:android:02149637b9bb8e6ecbc167",
+        "android_client_info": {
+          "package_name": "com.example.ghost_vpn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "989673027494-kp30p5sbjtgthhbcils55lg81aq0dr73.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ9AYkB1NyxyrT0rY9HyVgGXVj-XIqxsU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "989673027494-kp30p5sbjtgthhbcils55lg81aq0dr73.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

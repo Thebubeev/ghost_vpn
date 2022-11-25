@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ContainerSpeedWidget extends StatelessWidget {
   const ContainerSpeedWidget(
-      {Key? key, required this.speed, required this.type})
+      {Key key,  this.speed,  this.type})
       : super(key: key);
 
   final String type;
-  final String? speed;
+  final String speed;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class ContainerSpeedWidget extends StatelessWidget {
                   height: 6,
                 ),
                 Text(
-                  (int.parse(speed!) / 1024).toStringAsFixed(2),
+                  (int.parse(speed) / 1024).toStringAsFixed(2),
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,

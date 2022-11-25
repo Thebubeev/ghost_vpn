@@ -7,12 +7,12 @@ class VpnInitialState extends VpnState {}
 
 class VpnConnectedState extends VpnState {
   final bool isConnected;
-  VpnConnectedState({required this.isConnected});
+  VpnConnectedState({ this.isConnected});
 }
 
 class VpnDisconnectedState extends VpnState {
   final bool isConnected;
-  VpnDisconnectedState({required this.isConnected});
+  VpnDisconnectedState({ this.isConnected});
 }
 
 class VpnLoadingState extends VpnState {}

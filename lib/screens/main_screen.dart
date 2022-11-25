@@ -3,7 +3,7 @@ import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/services/shared_preferences_storage.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({Key key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -14,12 +14,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     prefs.getWelcome().then((value) {
-      if (value == true) {
-        Navigator.pushReplacementNamed(context, RoutesGenerator.VPN_MAIN_SCREEN);
-      }
-      if (value = false || value == null) {
         Navigator.pushReplacementNamed(context, RoutesGenerator.SPLASH_SCREEN);
-      }
     });
     super.initState();
   }

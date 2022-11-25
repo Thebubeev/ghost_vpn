@@ -7,12 +7,12 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
   final String textButton;
   final bool isBackButton;
   const SubscriptionCardBuyWidget({
-    required this.label,
-    required this.imagePath,
-    required this.text,
-    required this.textButton,
-    required this.isBackButton,
-    Key? key,
+     this.label,
+     this.imagePath,
+     this.text,
+     this.textButton,
+     this.isBackButton,
+    Key key,
   }) : super(key: key);
 
   @override

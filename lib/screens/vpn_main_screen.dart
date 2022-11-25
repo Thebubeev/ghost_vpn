@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ghost_vpn/bloc/vpn_bloc.dart';
+import 'package:ghost_vpn/bloc/VPN_FEATURE/vpn_bloc.dart';
+import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/screens/subscription_screen.dart';
+import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 class VpnMainScreen extends StatefulWidget {
-  const VpnMainScreen({Key? key}) : super(key: key);
+  const VpnMainScreen({Key key}) : super(key: key);
 
   @override
   State<VpnMainScreen> createState() => _VpnMainScreenState();
 }
 
 class _VpnMainScreenState extends State<VpnMainScreen> {
+  final auth = Auth();
   bool isConnected = false;
   bool isLoading = false;
 
-  late OpenVPN openvpn;
-  VpnStatus? status;
-  VPNStage? stage;
+  OpenVPN openvpn;
+  VpnStatus status;
+  VPNStage stage;
 
   String stringStage = 'disconnected';
 
@@ -34,13 +37,13 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     super.initState();
   }
 
-  void _onVpnStatusChanged(VpnStatus? vpnStatus) {
+  void _onVpnStatusChanged(VpnStatus vpnStatus) {
     setState(() {
       status = vpnStatus;
     });
   }
 
-  void _onVpnStageChanged(VPNStage? stage, String string) {
+  void _onVpnStageChanged(VPNStage stage, String string) {
     setState(() {
       this.stage = stage;
       isLoading = true;
@@ -48,7 +51,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     listenVpnStage(stage);
   }
 
-  listenVpnStage(VPNStage? vpnStage) {
+  listenVpnStage(VPNStage vpnStage) {
     switch (vpnStage.toString()) {
       case 'VPNStage.connected':
         setState(() {
@@ -108,19 +111,30 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,
             appBar: AppBar(
+              leading: IconButton(
+                  onPressed: () async {
+                    await showGeneralDialog(
+                        context: context,
+                        pageBuilder: (context, animation, _) {
+                          return const SubscriptionScreen();
+                        });
+                  },
+                  icon: const Icon(
+                    Icons.vertical_distribute_sharp,
+                    color: Colors.white,
+                  )),
               actions: [
                 IconButton(
-                    onPressed: () async {
-                      await showGeneralDialog(
-                          context: context,
-                          pageBuilder: (context, animation, _) {
-                            return const SubscriptionScreen();
-                          });
-                    },
-                    icon: const Icon(
-                      Icons.vertical_distribute_sharp,
-                      color: Colors.white,
-                    ))
+                  onPressed: () async {
+                    await auth.signOut();
+                    Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
+                    print('User is out');
+                  },
+                  icon: Icon(
+                    Icons.exit_to_app_outlined,
+                    color: Colors.white,
+                  ),
+                ),
               ],
               backgroundColor: Colors.black,
               automaticallyImplyLeading: false,
@@ -168,7 +182,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                       Padding(
                           padding: const EdgeInsets.only(top: 90),
                           child: Text(
-                            isConnected ? status!.duration! : '00:00:00',
+                            isConnected ? status.duration : '00:00:00',
                             style: const TextStyle(
                                 fontWeight: FontWeight.w300,
                                 fontSize: 50,
@@ -239,11 +253,11 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ContainerSpeedWidget(
-                                    speed: status!.byteIn,
+                                    speed: status.byteIn,
                                     type: 'Download',
                                   ),
                                   ContainerSpeedWidget(
-                                    speed: status!.byteOut,
+                                    speed: status.byteOut,
                                     type: 'Upload',
                                   ),
                                 ],
@@ -318,4 +332,3 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     );
   }
 }
-
