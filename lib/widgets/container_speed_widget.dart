@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ContainerSpeedWidget extends StatelessWidget {
   const ContainerSpeedWidget(
-      {Key key,  this.speed,  this.type})
+      {Key? key,required  this.speed,required  this.type})
       : super(key: key);
 
   final String type;

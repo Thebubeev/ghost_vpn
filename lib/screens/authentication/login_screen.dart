@@ -1,12 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ghost_vpn/bloc/VPN_AUTH/vpn_auth_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
+import 'package:ghost_vpn/screens/authentication/forget_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
+import 'package:ghost_vpn/widgets/loader_widget.dart';
 import 'package:ghost_vpn/widgets/widget.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key key}) : super(key: key);
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -14,154 +16,178 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final Auth auth = Auth();
-  final _firebaseAuth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
 
-  String _warning;
-  bool _isLoading;
+  String? _warning;
+  bool _isLoading = false;
 
   @override
-  void initState() {
-    _isLoading = false;
-    super.initState();
+  void dispose() {
+    if (!mounted) return;
+    _emailController.dispose();
+    _passController.dispose();
+    _warning = null;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
-        : Scaffold(
-            backgroundColor: Colors.black,
-            body: GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: Form(
-                key: _formKey,
-                child: SafeArea(
-                  child: ListView(
-                    padding: EdgeInsets.all(30),
-                    children: [
-                      iconBackButton(context),
-                      ShowAlert(
-                        warning: _warning,
-                      ),
-                      SizedBox(
-                        height: 25,
-                      ),
-                      Text(
-                        'Войти',
-                        style: TextStyle(
-                            fontSize: 70,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w300),
-                      ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                      TextFormEmailField(emailController: _emailController),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      TextFormPassField(passController: _passController),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      enterButton(
-                          _formKey, _submitForm, 'Войти', Colors.white, false),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      enterButton(_formKey, () async {
-                        try {
-                          await auth.signInWithGoogle().then((value) {
-                            if (value.user.uid != null) {
-                              Navigator.pushNamed(
-                                  context, RoutesGenerator.VPN_MAIN_SCREEN);
-                            }
-                          });
-                        } catch (e) {
-                          debugPrint(e.toString());
-                        }
-                      }, 'Войти с помощью Google', Colors.white, true),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/forgot');
+    return BlocListener<VpnAuthBloc, VpnAuthState>(
+      listener: (context, state) async {
+        if (state is VpnAuthNavigatorState) {
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.pushNamed(context, state.route);
+        }
+
+        if (state is VpnAuthLoginToastState) {
+          setState(() {
+            _isLoading = false;
+            _warning = 'Пожалуйста, подтвердите вашу почту.';
+            _emailController.text = '';
+            _passController.text = '';
+          });
+          await auth.sendVerificationEmail();
+        }
+
+        if (state is VpnAuthErrorState) {
+          if (state.warning ==
+              '[firebase_auth/unknown] Given String is empty or null') {
+            setState(() {
+              _isLoading = false;
+            });
+          } else {
+            setState(() {
+              _isLoading = false;
+              _warning = state.warning;
+            _emailController.text = '';
+            _passController.text = '';
+            });
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: _isLoading
+            ? LoaderWidget()
+            : GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: Form(
+                  key: _formKey,
+                  child: SafeArea(
+                    child: ListView(
+                      padding: EdgeInsets.all(30),
+                      children: [
+                        iconBackButton(context),
+                        ShowAlert(
+                          warning: _warning,
+                          function: () {
+                            setState(() {
+                              _warning = null;
+                            });
                           },
-                          child: Container(
-                            child: Text(
-                              'Забыли пароль?',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ))
-                    ],
+                        ),
+                        SizedBox(
+                          height: 25,
+                        ),
+                        Text(
+                          'Войти',
+                          style: TextStyle(
+                              fontSize: 70,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w300),
+                        ),
+                        SizedBox(
+                          height: 40,
+                        ),
+                        TextFormEmailField(emailController: _emailController),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        TextFormPassField(passController: _passController),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        enterButton(
+                          _formKey,
+                          _submitForm,
+                          'Войти',
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              BlocProvider.of<VpnAuthBloc>(context)
+                                  .add(VpnLoginWithGoogleEvent());
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10.0),
+                                    bottomLeft: Radius.circular(10.0),
+                                    bottomRight: Radius.circular(10.0),
+                                    topRight: Radius.circular(10.0),
+                                  ),
+                                  color: Colors.white),
+                              height: 70,
+                              width: 300,
+                              child: Center(
+                                  child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Войти с помощью Google',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gilroy',
+                                        fontSize: 17),
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Image.asset(
+                                    'assets/google.png',
+                                    fit: BoxFit.cover,
+                                    height: 30,
+                                    width: 30,
+                                  )
+                                ],
+                              )),
+                            )),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => ForgetScreen()));
+                            },
+                            child: Container(
+                              child: Text(
+                                'Восстановить пароль',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ))
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
+      ),
+    );
   }
 
   void _submitForm() async {
-    try {
-      setState(() => _isLoading = true);
-      await auth
-          .signInWithEmailAndPassword(
-              _emailController.text.trim(), _passController.text.trim())
-          .then((_) async => _firebaseAuth.currentUser.emailVerified
-              ? Navigator.pushReplacementNamed(context, '/home')
-              : {
-                  Fluttertoast.showToast(
-                      msg: 'Пожалуйста, проверьте ваш email!',
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 15,
-                      backgroundColor: Colors.black,
-                      textColor: Colors.white,
-                      fontSize: 15.0),
-                  await auth.sendVerificationEmail(),
-                  setState(() {
-                    _isLoading = false;
-                  })
-                });
-    } catch (error) {
-      print(error);
-      setState(() {
-        _isLoading = false;
-      });
-      switch (error.toString()) {
-        case "[firebase_auth/user-not-found] There is no user record corresponding to this identifier. The user may have been deleted.":
-          setState(() {
-            _warning = "Такого пользователя не существует!";
-          });
-          break;
-        case "[firebase_auth/too-many-requests] We have blocked all requests from this device due to unusual activity. Try again later.":
-          setState(() {
-            _warning = "Слишком много запросов. Попробуйте позже!";
-          });
-          break;
-        case "[firebase_auth/invalid-email] The email address is badly formatted.":
-          setState(() {
-            _warning = _firebaseAuth.currentUser.emailVerified
-                ? "Почта не доступна."
-                : 'Пожалуйста, подтвердите вашу почту.';
-          });
-          _firebaseAuth.currentUser.emailVerified
-              ? null
-              : await auth.sendVerificationEmail();
-          break;
-        case "[firebase_auth/wrong-password] The password is invalid or the user does not have a password.":
-          setState(() {
-            _warning = "Логин или пароль неверный.";
-          });
-          break;
-        case "[firebase_auth/unknown] Given String is empty or null":
-          setState(() {});
-          break;
-      }
-    }
+    setState(() => _isLoading = true);
+    BlocProvider.of<VpnAuthBloc>(context).add(VpnLoginEvent(
+        login: _emailController.text.trim(),
+        password: _passController.text.trim()));
   }
 }

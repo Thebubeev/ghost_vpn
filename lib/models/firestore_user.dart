@@ -5,18 +5,19 @@ class UserField {
   static final String lastCreationTime = 'lastCreationTime';
 }
 
+
 class FirestoreUser extends Equatable {
   final String idUser;
   final String email;
   final bool isPaid;
-  final bool isPromo;
-  final DateTime lastCreationTime;
+  final String isPromo;
+  final DateTime? lastCreationTime;
   FirestoreUser(
-      {this.idUser,
-      this.email,
-      this.isPaid,
-      this.isPromo,
-      this.lastCreationTime});
+      {required this.idUser,
+    required  this.email,
+    required  this.isPaid,
+    required  this.isPromo,
+    required  this.lastCreationTime});
 
   static FirestoreUser fromJson(DocumentSnapshot snapshot) {
     FirestoreUser firestoreUser = FirestoreUser(
@@ -39,17 +40,17 @@ class FirestoreUser extends Equatable {
   }
 
   @override
-  List<Object> get props => [idUser, email, lastCreationTime];
+  List<Object> get props => [idUser, email, lastCreationTime as Object];
 }
 
 class Utils {
-  static DateTime toDateTime(Timestamp value) {
+  static DateTime? toDateTime(Timestamp? value) {
     if (value == null) return null;
 
     return value.toDate();
   }
 
-  static dynamic fromDateTimeToJson(DateTime date) {
+  static dynamic fromDateTimeToJson(DateTime? date) {
     if (date == null) return null;
 
     return date.toUtc();

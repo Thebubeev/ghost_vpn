@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ghost_vpn/bloc/VPN_AUTH/vpn_auth_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
-import 'package:ghost_vpn/models/firestore_user.dart';
+import 'package:ghost_vpn/widgets/loader_widget.dart';
+import 'package:ghost_vpn/widgets/widget.dart';
 
 class PromoScreen extends StatefulWidget {
-  final String email;
-  const PromoScreen({Key key, this.email}) : super(key: key);
+  final String? email;
+  const PromoScreen({Key? key, this.email}) : super(key: key);
 
   @override
   State<PromoScreen> createState() => _PromoScreenState();
@@ -15,10 +18,20 @@ class _PromoScreenState extends State<PromoScreen> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   dynamic chatDocId;
 
+  bool _isLoading = false;
+  String? _warning;
+
   @override
   void initState() {
     checkUser();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (!mounted) return;
+    _warning = null;
+    super.dispose();
   }
 
   Future<void> checkUser() async {
@@ -31,19 +44,9 @@ class _PromoScreenState extends State<PromoScreen> {
         setState(() {
           chatDocId = snapshot.docs.single.id;
         });
-        DateTime promoTime = DateTime.now();
-        final expDay = promoTime.day + 5;
-        final expMonth = promoTime.month;
-        final expYear = promoTime.year;
-        DateTime expTime = DateTime(expYear, expMonth, expDay);
-        await users.doc(chatDocId).update({
-          'isPromo': true,
-          'promoStartedTime': Utils.fromDateTimeToJson(DateTime.now()),
-          'promoExpirationTime': Utils.fromDateTimeToJson(expTime),
-        });
         print('-------chatDocId: $chatDocId');
       } else {
-        await users.add({'isPromo': true}).then((value) {
+        await users.add({'isPromo': '1'}).then((value) {
           chatDocId = value;
         });
       }
@@ -52,51 +55,81 @@ class _PromoScreenState extends State<PromoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Привет, друг.\t Рады привествовать вас на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное пользование нашего сервиса на протяжение 5 дней.\n\nУдачного дня.',
-                  style: TextStyle(color: Colors.white, fontSize: 19),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
-                        context, RoutesGenerator.VPN_MAIN_SCREEN);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10.0),
-                        bottomLeft: Radius.circular(10.0),
-                        bottomRight: Radius.circular(10.0),
-                        topRight: Radius.circular(10.0),
+    return BlocListener<VpnAuthBloc, VpnAuthState>(
+      listener: (context, state) {
+        if (state is VpnAuthPromoDataState) {
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.pushNamed(context, RoutesGenerator.VPN_MAIN_SCREEN);
+        }
+
+        if (state is VpnAuthErrorState) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: _isLoading
+            ? LoaderWidget()
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ShowAlert(
+                        warning: _warning,
+                        function: () {
+                          setState(() {
+                            _warning = null;
+                          });
+                        },
                       ),
-                      color: Colors.white,
-                    ),
-                    height: 70,
-                    width: 300,
-                    child: Center(
-                        child: Text('Перейти дальше',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 23,
-                              fontWeight: FontWeight.w300,
-                            ))),
-                  ),
-                ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Привет, друг.\t Рады привествовать вас на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное использование нашего сервиса на протяжение 5 дней.\n\nУдачного дня.',
+                          style: TextStyle(color: Colors.white, fontSize: 19),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            BlocProvider.of<VpnAuthBloc>(context).add(
+                                VpnSendPromoData(
+                                    chatDocId: chatDocId, collection: users));
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10.0),
+                                bottomLeft: Radius.circular(10.0),
+                                bottomRight: Radius.circular(10.0),
+                                topRight: Radius.circular(10.0),
+                              ),
+                              color: Colors.white,
+                            ),
+                            height: 70,
+                            width: 300,
+                            child: Center(
+                                child: Text('Перейти дальше',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.w300,
+                                    ))),
+                          ),
+                        ),
+                      ),
+                    ]),
               ),
-            ]),
       ),
     );
   }

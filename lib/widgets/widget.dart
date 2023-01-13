@@ -6,15 +6,12 @@ void _fieldFocusChange(
   FocusScope.of(context).requestFocus(nextFocus);
 }
 
-final _emailFocus = FocusNode();
-final _passFocus = FocusNode();
-final _confirmPassFocus = FocusNode();
-
 bool _isPasswordVisible = false;
 
 class TextFormEmailField extends StatefulWidget {
   final TextEditingController emailController;
-  const TextFormEmailField({Key key, this.emailController}) : super(key: key);
+  const TextFormEmailField({Key? key, required this.emailController})
+      : super(key: key);
 
   @override
   State<TextFormEmailField> createState() => _TextFormEmailFieldState();
@@ -39,16 +36,11 @@ class _TextFormEmailFieldState extends State<TextFormEmailField> {
             borderSide: BorderSide(color: Colors.grey),
             borderRadius: BorderRadius.circular(10)),
       ),
-      // autofocus: true,
       controller: widget.emailController,
-      onFieldSubmitted: (_) {
-        _fieldFocusChange(context, _emailFocus, _passFocus);
-      },
-      focusNode: _emailFocus,
       validator: (val) {
-        if (val.isEmpty) {
+        if (val!.isEmpty || val == '') {
           return 'Введите почту';
-        } else if (!val.contains('@') || (!val.contains('.'))) {
+        } else if (val.contains('@') == false || (val.contains('.') == false)) {
           return 'Введите настоящую почту!';
         } else {
           return null;
@@ -56,7 +48,7 @@ class _TextFormEmailFieldState extends State<TextFormEmailField> {
       },
       onSaved: (val) {
         setState(() {
-          widget.emailController.text = val;
+          widget.emailController.text = val as String;
         });
       },
     );
@@ -65,7 +57,8 @@ class _TextFormEmailFieldState extends State<TextFormEmailField> {
 
 class TextFormPassField extends StatefulWidget {
   final TextEditingController passController;
-  const TextFormPassField({Key key, this.passController}) : super(key: key);
+  const TextFormPassField({Key? key, required this.passController})
+      : super(key: key);
 
   @override
   State<TextFormPassField> createState() => _TextFormPassFieldState();
@@ -104,16 +97,9 @@ class _TextFormPassFieldState extends State<TextFormPassField> {
             ),
           )),
       controller: widget.passController,
-      focusNode: _passFocus,
-      // autofocus: true,
-      onFieldSubmitted: (_) {
-        _fieldFocusChange(context, _passFocus, _confirmPassFocus);
-      },
-      validator: (String val) {
-        if (val.isEmpty) {
+      validator: (val) {
+        if (val!.isEmpty || val == '') {
           return 'Введите пароль';
-        } else if (val.length < 6) {
-          return 'Пароль должен содержать больше 6 символов!';
         } else {
           return null;
         }
@@ -121,7 +107,7 @@ class _TextFormPassFieldState extends State<TextFormPassField> {
       obscureText: _isPasswordVisible ? false : true,
       onSaved: (val) {
         setState(() {
-          widget.passController.text = val;
+          widget.passController.text = val as String;
         });
       },
     );
@@ -131,7 +117,9 @@ class _TextFormPassFieldState extends State<TextFormPassField> {
 class TextFormConfirmPassField extends StatefulWidget {
   final TextEditingController passController, confirmPassController;
   const TextFormConfirmPassField(
-      {Key key, this.passController, this.confirmPassController})
+      {Key? key,
+      required this.passController,
+      required this.confirmPassController})
       : super(key: key);
 
   @override
@@ -172,15 +160,11 @@ class _TextFormConfirmPassFieldState extends State<TextFormConfirmPassField> {
             ),
           )),
       controller: widget.confirmPassController,
-      // autofocus: true,
-      focusNode: _confirmPassFocus,
-      validator: (String val) {
-        if (val.isEmpty) {
+      validator: (val) {
+        if (val!.isEmpty || val == '') {
           return 'Введите пароль';
-        } else if (val.length < 6) {
-          return 'Пароль должен содержать больше 6 символов!';
         } else if (val.trim() != widget.passController.text.trim()) {
-          return "Пароли должны быть одиноковыми";
+          return "Пароли должны быть одинаковыми";
         } else {
           return null;
         }
@@ -188,7 +172,7 @@ class _TextFormConfirmPassFieldState extends State<TextFormConfirmPassField> {
       obscureText: _isPasswordVisible ? false : true,
       onSaved: (val) {
         setState(() {
-          widget.passController.text = val;
+          widget.passController.text = val as String;
         });
       },
     );
@@ -196,8 +180,9 @@ class _TextFormConfirmPassFieldState extends State<TextFormConfirmPassField> {
 }
 
 class ShowAlert extends StatefulWidget {
-  String warning;
-  ShowAlert({Key key, @required this.warning}) : super(key: key);
+  String? warning;
+  Function? function;
+  ShowAlert({Key? key, this.warning, this.function}) : super(key: key);
 
   @override
   State<ShowAlert> createState() => _ShowAlertState();
@@ -208,28 +193,29 @@ class _ShowAlertState extends State<ShowAlert> {
   Widget build(BuildContext context) {
     if (widget.warning != null) {
       return Container(
-        color: Colors.redAccent,
+        color: Colors.white,
         child: Row(
           children: <Widget>[
             Padding(
                 padding: EdgeInsets.only(left: 10, right: 10),
-                child: Icon(Icons.error_outline)),
+                child: Icon(Icons.error_outline, color: Colors.black)),
             Expanded(
               child: Text(
-                widget.warning,
+                widget.warning!,
                 style: TextStyle(
-                    fontSize: 18, fontFamily: 'Gilroy', color: Colors.white),
+                    fontSize: 18, fontFamily: 'Gilroy', color: Colors.black),
                 maxLines: 3,
               ),
             ),
             Padding(
               padding: EdgeInsets.only(left: 10),
               child: IconButton(
-                icon: Icon(Icons.close),
+                icon: Icon(
+                  Icons.close,
+                  color: Colors.black,
+                ),
                 onPressed: () {
-                  setState(() {
-                    widget.warning = null;
-                  });
+                  widget.function!();
                 },
               ),
             )
@@ -251,16 +237,13 @@ Widget iconBackButton(BuildContext context) => IconButton(
     });
 
 Widget enterButton(GlobalKey<FormState> _formKey, Function _submitForm,
-        String text, Color Color, bool isGoogle) =>
+        String text,) =>
     GestureDetector(
         onTap: () async {
-          if (_formKey.currentState.validate() && isGoogle == false) {
-            _formKey.currentState.save();
+          if (_formKey.currentState!.validate()) {
+            _formKey.currentState!.save();
             _submitForm();
-          } else {
-            _submitForm();
-          }
-        },
+        }},
         child: Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
@@ -269,33 +252,11 @@ Widget enterButton(GlobalKey<FormState> _formKey, Function _submitForm,
                 bottomRight: Radius.circular(10.0),
                 topRight: Radius.circular(10.0),
               ),
-              color: Color),
+              color: Colors.white),
           height: 70,
           width: 300,
           child: Center(
-              child: isGoogle
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          text,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gilroy',
-                              fontSize: 17),
-                        ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Image.asset(
-                          'assets/google.png',
-                          fit: BoxFit.cover,
-                          height: 30,
-                          width: 30,
-                        )
-                      ],
-                    )
-                  : Text(
+              child:Text(
                       text,
                       style: TextStyle(
                           color: Colors.black,

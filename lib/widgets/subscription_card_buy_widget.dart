@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 
 class SubscriptionCardBuyWidget extends StatelessWidget {
-  final String label;
+  final String title;
+  final int value;
+  final String subtitle;
   final String imagePath;
   final String text;
   final String textButton;
   final bool isBackButton;
   const SubscriptionCardBuyWidget({
-     this.label,
-     this.imagePath,
-     this.text,
-     this.textButton,
-     this.isBackButton,
-    Key key,
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.imagePath,
+    required this.text,
+    required this.textButton,
+    required this.isBackButton,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -30,7 +36,7 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        label,
+                        subtitle,
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 19,
@@ -48,7 +54,7 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
                     ],
                   )
                 : Text(
-                    label,
+                    subtitle,
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 19,
@@ -70,7 +76,11 @@ class SubscriptionCardBuyWidget extends StatelessWidget {
             ),
             ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(primary: Colors.white),
-                onPressed: () {},
+                onPressed: () {
+                  BlocProvider.of<VpnBloc>(context)
+                      .add(VpnSubscriptionPay(title: title, value: value));
+                  
+                },
                 icon: const Icon(
                   Icons.arrow_forward_ios_outlined,
                   color: Colors.black,

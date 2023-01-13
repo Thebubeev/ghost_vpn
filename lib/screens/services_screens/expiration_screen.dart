@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ghost_vpn/config/router.dart';
 
 class ExpirationScreen extends StatefulWidget {
-  const ExpirationScreen({Key key}) : super(key: key);
+  const ExpirationScreen({Key? key}) : super(key: key);
 
   @override
   State<ExpirationScreen> createState() => _ExpirationScreenState();
@@ -22,7 +22,7 @@ class _ExpirationScreenState extends State<ExpirationScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Вот и закончилась бесплатная подписка. Надеюсь ты оценил наш VPN сервис и готов перейти на страницу оплаты для продления подписки.',
+                  'Вот и закончилась подписка. Надеюсь ты готов перейти на страницу оплаты для продления подписки.',
                   style: TextStyle(color: Colors.white, fontSize: 19),
                 ),
               ),

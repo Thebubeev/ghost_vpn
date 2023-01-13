@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ghost_vpn/bloc/VPN_FEATURE/vpn_bloc.dart';
+import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
-import 'package:ghost_vpn/screens/subscription_screen.dart';
+import 'package:ghost_vpn/screens/services_screens/subscription_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 class VpnMainScreen extends StatefulWidget {
-  const VpnMainScreen({Key key}) : super(key: key);
+  const VpnMainScreen({Key? key}) : super(key: key);
 
   @override
   State<VpnMainScreen> createState() => _VpnMainScreenState();
@@ -19,9 +19,9 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   bool isConnected = false;
   bool isLoading = false;
 
-  OpenVPN openvpn;
-  VpnStatus status;
-  VPNStage stage;
+  late OpenVPN openvpn;
+  late VpnStatus? status;
+  late VPNStage stage;
 
   String stringStage = 'disconnected';
 
@@ -37,13 +37,15 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     super.initState();
   }
 
-  void _onVpnStatusChanged(VpnStatus vpnStatus) {
+  void _onVpnStatusChanged(VpnStatus? vpnStatus) {
+    if (!mounted) return;
     setState(() {
       status = vpnStatus;
     });
   }
 
   void _onVpnStageChanged(VPNStage stage, String string) {
+    if (!mounted) return;
     setState(() {
       this.stage = stage;
       isLoading = true;
@@ -54,6 +56,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   listenVpnStage(VPNStage vpnStage) {
     switch (vpnStage.toString()) {
       case 'VPNStage.connected':
+        if (!mounted) return;
         setState(() {
           isConnected = true;
           isLoading = false;
@@ -61,6 +64,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
         });
         break;
       case 'VPNStage.disconnected':
+        if (!mounted) return;
         setState(() {
           isConnected = false;
           isLoading = false;
@@ -68,6 +72,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
         });
         break;
       case 'VPNStage.unknown':
+        if (!mounted) return;
         setState(() {
           isConnected = false;
           isLoading = false;
@@ -75,6 +80,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
         });
         break;
       default:
+        if (!mounted) return;
         setState(() {
           isLoading = true;
           stringStage = 'Loading...';
@@ -88,12 +94,14 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     return BlocListener<VpnBloc, VpnState>(
       listener: (context, state) {
         if (state is VpnConnectedState) {
+          if (!mounted) return;
           setState(() {
             isConnected = false;
           });
         }
 
         if (state is VpnDisconnectedState) {
+          if (!mounted) return;
           setState(() {
             isConnected = state.isConnected;
           });
@@ -111,18 +119,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,
             appBar: AppBar(
-              leading: IconButton(
-                  onPressed: () async {
-                    await showGeneralDialog(
-                        context: context,
-                        pageBuilder: (context, animation, _) {
-                          return const SubscriptionScreen();
-                        });
-                  },
-                  icon: const Icon(
-                    Icons.vertical_distribute_sharp,
-                    color: Colors.white,
-                  )),
               actions: [
                 IconButton(
                   onPressed: () async {
@@ -174,157 +170,91 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
               ),
             ),
             body: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                          padding: const EdgeInsets.only(top: 90),
-                          child: Text(
-                            isConnected ? status.duration : '00:00:00',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w300,
-                                fontSize: 50,
-                                color: Colors.white),
-                          )),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          isConnected
-                              ? BlocProvider.of<VpnBloc>(context)
-                                  .add(VpnDisconnect(openVPN: openvpn))
-                              : BlocProvider.of<VpnBloc>(context)
-                                  .add(VpnConnect(openVPN: openvpn));
-                        },
-                        child: Material(
-                            elevation: 3,
-                            borderRadius: BorderRadius.circular(150),
-                            child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color:
-                                      isConnected ? Colors.red : Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Container(
-                                    height: 140,
-                                    width: 140,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.power_settings_new,
-                                          size: 34,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          isLoading
-                                              ? 'LOADING'
-                                              : isConnected
-                                                  ? 'STOP'
-                                                  : "START",
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 23,
-                                            fontWeight: FontWeight.w100,
-                                          ),
-                                        ),
-                                      ],
-                                    )))),
-                      ),
-                      isConnected
-                          ? Padding(
-                              padding: const EdgeInsets.only(
-                                top: 20,
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      isConnected ? status!.duration! : '00:00:00',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 60,
+                          color: Colors.white),
+                    ),
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        isConnected
+                            ? BlocProvider.of<VpnBloc>(context)
+                                .add(VpnDisconnect(openVPN: openvpn))
+                            : BlocProvider.of<VpnBloc>(context)
+                                .add(VpnConnect(openVPN: openvpn));
+                      },
+                      child: Material(
+                          elevation: 3,
+                          borderRadius: BorderRadius.circular(150),
+                          child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isConnected ? Colors.red : Colors.white,
+                                shape: BoxShape.circle,
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  ContainerSpeedWidget(
-                                    speed: status.byteIn,
-                                    type: 'Download',
+                              child: Container(
+                                  height: 140,
+                                  width: 140,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black,
+                                    shape: BoxShape.circle,
                                   ),
-                                  ContainerSpeedWidget(
-                                    speed: status.byteOut,
-                                    type: 'Upload',
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(),
-                      Expanded(
-                        child: DraggableScrollableSheet(
-                          minChildSize: 0.30,
-                          maxChildSize: 0.60,
-                          initialChildSize: 0.30,
-                          builder: (BuildContext context,
-                              ScrollController scrollController) {
-                            return Container(
-                              decoration: const BoxDecoration(
-                                  color: Color.fromARGB(255, 41, 41, 40),
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(45),
-                                    topLeft: Radius.circular(45),
-                                  )),
-                              child: ListView.builder(
-                                controller: scrollController,
-                                itemCount: 7,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return const Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 10, bottom: 5),
-                                      child: Divider(
-                                        indent: 140,
-                                        endIndent: 140,
-                                        thickness: 5.0,
-                                        color: Colors.black,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.power_settings_new,
+                                        size: 34,
+                                        color: Colors.white,
                                       ),
-                                    );
-                                  }
-                                  return ListTile(
-                                    title: const Text(
-                                      'Амстердам 141.0.12.142',
-                                      style: TextStyle(
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        isLoading
+                                            ? 'LOADING'
+                                            : isConnected
+                                                ? 'STOP'
+                                                : "START",
+                                        style: const TextStyle(
                                           color: Colors.white,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                    leading: Image.asset(
-                                      'assets/flags/net.png',
-                                      fit: BoxFit.cover,
-                                      width: 35,
-                                      height: 35,
-                                    ),
-                                    trailing: IconButton(
-                                        onPressed: () {},
-                                        icon: const Padding(
-                                          padding: EdgeInsets.only(left: 10),
-                                          child: Icon(
-                                            Icons.arrow_forward_ios,
-                                            color: Colors.white,
-                                          ),
-                                        )),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ]),
-              ),
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.w100,
+                                        ),
+                                      ),
+                                    ],
+                                  )))),
+                    ),
+                    isConnected
+                        ? Padding(
+                            padding: const EdgeInsets.only(
+                              top: 20,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ContainerSpeedWidget(
+                                  speed: status!.byteIn!,
+                                  type: 'Download',
+                                ),
+                                ContainerSpeedWidget(
+                                  speed: status!.byteOut!,
+                                  type: 'Upload',
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(),
+                  ]),
             ),
           ),
         ],

@@ -3,7 +3,7 @@ import 'package:ghost_vpn/screens/services_screens/toggle_screen.dart';
 import 'package:ghost_vpn/services/shared_preferences_storage.dart';
 
 class SplashStartScreen extends StatefulWidget {
-  const SplashStartScreen({Key key}) : super(key: key);
+  const SplashStartScreen({Key? key}) : super(key: key);
 
   @override
   State<SplashStartScreen> createState() => _SplashStartScreenState();
@@ -15,6 +15,12 @@ class _SplashStartScreenState extends State<SplashStartScreen> {
   void initState() {
     init();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (!mounted) return;
+    super.dispose();
   }
 
   @override

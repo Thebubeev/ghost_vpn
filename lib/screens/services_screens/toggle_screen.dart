@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +9,7 @@ import 'package:ghost_vpn/screens/services_screens/expiration_screen.dart';
 import 'package:ghost_vpn/screens/services_screens/promo_screen.dart';
 import 'package:ghost_vpn/screens/vpn_main_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
+import 'package:ghost_vpn/widgets/loader_widget.dart';
 
 class ToggleScreen extends StatefulWidget {
   @override
@@ -20,72 +20,81 @@ class _ToggleScreenState extends State<ToggleScreen> {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   final auth = Auth();
   final _firebaseAuth = FirebaseAuth.instance;
-  Timer timer;
-  bool isEmailVerified;
+  Timer? timer;
+  bool? isEmailVerified;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-  dynamic chatDocId;
 
-  bool isPromo;
-  bool isPaid;
+  dynamic chatDocId;
+  String? email = '';
+
+  String? isPromo = '0';
+  bool isPaid = false;
   bool isTimetoPay = false;
 
-  bool isEmptyData;
-
-  Timestamp promoExpirationTime;
+  Timestamp? promoExpirationTime;
 
   @override
   void initState() {
     super.initState();
-    checkFields();
     isEmailVerified = _firebaseAuth.currentUser?.emailVerified;
     if (isEmailVerified == null) {
       return null;
-    } else if (!isEmailVerified) {
-      timer = Timer.periodic(Duration(seconds: 5), (_) => checkEmailVerified());
+    } else if (isEmailVerified!) {
+      setState(() {
+        if (!mounted) return;
+        email = _firebaseAuth.currentUser!.email;
+      });
+      timer = Timer.periodic(Duration(seconds: 5), (_) {
+        checkEmailVerified();
+        checkFields();
+      });
     }
   }
 
   @override
   void dispose() {
+    if (!mounted) return;
     timer?.cancel();
     super.dispose();
   }
 
-  Future<void> checkFields() async {
-    await users.snapshots().listen((event) {
-      if (event.docs.isEmpty) {
-        setState(() {
-          isEmptyData = true;
-        });
-      } else {
-        print('data is not empty');
-      }
-    });
+  Future checkFields() async {
     await users
-        .where('email', isEqualTo: 'bubeevm@gmail.com')
+        .where('email', isEqualTo: email)
         .limit(1)
         .get()
         .then((snapshot) async {
       if (snapshot.docs.isNotEmpty) {
         setState(() {
-          promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
+          if (!mounted) return;
           isPaid = snapshot.docs.single.get('isPaid');
           isPromo = snapshot.docs.single.get('isPromo');
-          isTimetoPay = getTimetoPay();
+          chatDocId = snapshot.docs.single.id;
+        });
+      }
+      if (isPromo == '1' || isPromo == '2') {
+        setState(() async {
+          if (!mounted) return;
+          promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
+          isTimetoPay = await getTimeToPay(snapshot.docs.single.id);
         });
       }
     }).catchError((error) {});
   }
 
-  bool getTimetoPay() {
-    DateTime expTime = Utils.toDateTime(promoExpirationTime);
-    return expTime.isAfter(DateTime.now());
+  Future<bool> getTimeToPay(dynamic doc) async {
+    final expTime = Utils.toDateTime(promoExpirationTime);
+    final isInnerTimeToPay = expTime!.isBefore(DateTime.now());
+    if (isInnerTimeToPay) {
+      await users.doc(doc).update({'isPaid': false, 'isPromo': '1'});
+    }
+    return isInnerTimeToPay;
   }
 
   Future checkEmailVerified() async {
     await _firebaseAuth.currentUser?.reload();
     isEmailVerified = _firebaseAuth.currentUser?.emailVerified;
-    if (isEmailVerified) {
+    if (isEmailVerified != null && isEmailVerified == true) {
       timer?.cancel();
     }
   }
@@ -102,33 +111,41 @@ class _ToggleScreenState extends State<ToggleScreen> {
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
-          return StreamBuilder(
+          return StreamBuilder<User?>(
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
                   final email = snapshot.data?.email;
                   if (isEmailVerified == false || isEmailVerified == null) {
                     return Wrapper();
-                  } else if (isEmailVerified &&
-                      isPromo == false &&
-                      isTimetoPay == false) {
+                  } else if (isEmailVerified! &&
+                      isPromo == '-1' &&
+                      isTimetoPay == false &&
+                      isPaid == false) {
                     return PromoScreen(
                       email: email,
                     );
-                  } else if (isPromo == null) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (isEmptyData == true) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (isTimetoPay && isEmailVerified && isPromo) {
+                  } else if (isTimetoPay &&
+                      isEmailVerified! &&
+                      isPromo == '1' &&
+                      isPaid == false) {
                     return ExpirationScreen();
-                  } else if (isEmailVerified && isPromo) {
+                  } else if (isEmailVerified! &&
+                      isPromo == '2' &&
+                      isTimetoPay == false &&
+                      isPaid == false) {
+                    return VpnMainScreen();
+                  } else if (isEmailVerified! &&
+                      isPromo == '1' &&
+                      isPaid &&
+                      isTimetoPay == false) {
                     return VpnMainScreen();
                   }
                 }
-                return Center(child: CircularProgressIndicator());
+                return LoaderWidget();
               });
         }
-        return Center(child: CircularProgressIndicator());
+        return LoaderWidget();
       },
     );
   }
