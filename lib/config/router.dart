@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ghost_vpn/main.dart';
 import 'package:ghost_vpn/screens/authentication/forget_screen.dart';
 import 'package:ghost_vpn/screens/authentication/login_screen.dart';
 import 'package:ghost_vpn/screens/authentication/register_screen.dart';
 import 'package:ghost_vpn/screens/authentication/wrapper_screen.dart';
-import 'package:ghost_vpn/screens/main_screen.dart';
 import 'package:ghost_vpn/screens/services_screens/promo_screen.dart';
 import 'package:ghost_vpn/screens/services_screens/splash_start_screen.dart';
 import 'package:ghost_vpn/screens/services_screens/toggle_screen.dart';
@@ -55,6 +55,6 @@ class RoutesGenerator {
       case REGISTER:
         return MaterialPageRoute(builder: (_) => RegisterScreen());
     }
-    return MaterialPageRoute(builder: (_) => MainScreen());
+    return MaterialPageRoute(builder: (_) => MyApp());
   }
 }

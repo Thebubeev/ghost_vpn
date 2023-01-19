@@ -46,6 +46,11 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
       }
     });
 
+    on<VpnExitApp>((event, emit) {
+      event.openVPN.disconnect();
+      emit(VpnExitAppState(isConnected: false));
+    });
+
     on<VpnDisconnect>((event, emit) async {
       event.openVPN.disconnect();
       emit(VpnDisconnectedState(isConnected: false));

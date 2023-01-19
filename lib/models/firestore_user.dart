@@ -9,13 +9,11 @@ class UserField {
 class FirestoreUser extends Equatable {
   final String idUser;
   final String email;
-  final bool isPaid;
   final String isPromo;
   final DateTime? lastCreationTime;
   FirestoreUser(
       {required this.idUser,
     required  this.email,
-    required  this.isPaid,
     required  this.isPromo,
     required  this.lastCreationTime});
 
@@ -23,7 +21,6 @@ class FirestoreUser extends Equatable {
     FirestoreUser firestoreUser = FirestoreUser(
         idUser: snapshot['idUser'],
         email: snapshot['email'],
-        isPaid: snapshot['isPaid'],
         isPromo: snapshot['isPromo'],
         lastCreationTime: Utils.toDateTime(snapshot['lastCreationTime']));
     return firestoreUser;
@@ -33,7 +30,6 @@ class FirestoreUser extends Equatable {
     return {
       'idUser': idUser,
       'email': email,
-      'isPaid': isPaid,
       'isPromo': isPromo,
       'lastCreationTime': Utils.fromDateTimeToJson(lastCreationTime),
     };

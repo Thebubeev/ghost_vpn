@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ContainerSpeedWidget extends StatelessWidget {
   const ContainerSpeedWidget(
-      {Key? key,required  this.speed,required  this.type})
+      {Key? key, required this.speed, required this.type})
       : super(key: key);
 
   final String type;
@@ -32,23 +32,10 @@ class ContainerSpeedWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.arrow_drop_down_rounded, color: Colors.white),
-                    RichText(
-                      text: TextSpan(
-                        text: type,
-                        style: TextStyle(
+                    Text(type,   style: TextStyle(
                             fontWeight: FontWeight.w300,
                             color: Colors.white,
-                            fontSize: 17),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: ' kB',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  color: Colors.white,
-                                  fontSize: 12))
-                        ],
-                      ),
-                    ),
+                            fontSize: 17),),
                     const SizedBox(
                       width: 15,
                     )
@@ -58,7 +45,7 @@ class ContainerSpeedWidget extends StatelessWidget {
                   height: 6,
                 ),
                 Text(
-                  (int.parse(speed) / 1024).toStringAsFixed(2),
+                  (int.parse(speed) / 1024).toStringAsFixed(2) + " kB",
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,

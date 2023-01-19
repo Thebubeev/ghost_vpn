@@ -20,7 +20,6 @@ class _ToggleScreenState extends State<ToggleScreen> {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   final auth = Auth();
   final _firebaseAuth = FirebaseAuth.instance;
-  Timer? timer;
   bool? isEmailVerified;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
@@ -28,7 +27,6 @@ class _ToggleScreenState extends State<ToggleScreen> {
   String? email = '';
 
   String? isPromo = '0';
-  bool isPaid = false;
   bool isTimetoPay = false;
 
   Timestamp? promoExpirationTime;
@@ -44,18 +42,9 @@ class _ToggleScreenState extends State<ToggleScreen> {
         if (!mounted) return;
         email = _firebaseAuth.currentUser!.email;
       });
-      timer = Timer.periodic(Duration(seconds: 5), (_) {
-        checkEmailVerified();
-        checkFields();
-      });
+      checkEmailVerified();
     }
-  }
-
-  @override
-  void dispose() {
-    if (!mounted) return;
-    timer?.cancel();
-    super.dispose();
+    checkFields();
   }
 
   Future checkFields() async {
@@ -67,7 +56,6 @@ class _ToggleScreenState extends State<ToggleScreen> {
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           if (!mounted) return;
-          isPaid = snapshot.docs.single.get('isPaid');
           isPromo = snapshot.docs.single.get('isPromo');
           chatDocId = snapshot.docs.single.id;
         });
@@ -86,17 +74,19 @@ class _ToggleScreenState extends State<ToggleScreen> {
     final expTime = Utils.toDateTime(promoExpirationTime);
     final isInnerTimeToPay = expTime!.isBefore(DateTime.now());
     if (isInnerTimeToPay) {
-      await users.doc(doc).update({'isPaid': false, 'isPromo': '1'});
+      await users.doc(doc).update({ 'isPromo': '1'});
+      setState(() {
+        isPromo = '1';
+      });
     }
     return isInnerTimeToPay;
   }
 
   Future checkEmailVerified() async {
     await _firebaseAuth.currentUser?.reload();
-    isEmailVerified = _firebaseAuth.currentUser?.emailVerified;
-    if (isEmailVerified != null && isEmailVerified == true) {
-      timer?.cancel();
-    }
+    setState(() {
+      isEmailVerified = _firebaseAuth.currentUser?.emailVerified;
+    });
   }
 
   @override
@@ -120,27 +110,19 @@ class _ToggleScreenState extends State<ToggleScreen> {
                     return Wrapper();
                   } else if (isEmailVerified! &&
                       isPromo == '-1' &&
-                      isTimetoPay == false &&
-                      isPaid == false) {
+                      isTimetoPay == false) {
                     return PromoScreen(
                       email: email,
                     );
                   } else if (isTimetoPay &&
                       isEmailVerified! &&
-                      isPromo == '1' &&
-                      isPaid == false) {
+                      isPromo == '1' ) {
                     return ExpirationScreen();
                   } else if (isEmailVerified! &&
                       isPromo == '2' &&
-                      isTimetoPay == false &&
-                      isPaid == false) {
+                      isTimetoPay == false ) {
                     return VpnMainScreen();
-                  } else if (isEmailVerified! &&
-                      isPromo == '1' &&
-                      isPaid &&
-                      isTimetoPay == false) {
-                    return VpnMainScreen();
-                  }
+                  } 
                 }
                 return LoaderWidget();
               });

@@ -21,4 +21,9 @@ class VpnLoadingState extends VpnState {}
 
 class VpnReturnState extends VpnState {}
 
+class VpnExitAppState extends VpnState{
+  final bool isConnected;
+
+  VpnExitAppState({required this.isConnected});}
+
 class VpnErrorState extends VpnState {}

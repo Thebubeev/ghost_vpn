@@ -100,6 +100,8 @@ class _TextFormPassFieldState extends State<TextFormPassField> {
       validator: (val) {
         if (val!.isEmpty || val == '') {
           return 'Введите пароль';
+        } else if (val.length < 6) {
+          return 'Пароль должен быть больше 6 символов';
         } else {
           return null;
         }
@@ -163,6 +165,8 @@ class _TextFormConfirmPassFieldState extends State<TextFormConfirmPassField> {
       validator: (val) {
         if (val!.isEmpty || val == '') {
           return 'Введите пароль';
+        } else if (val.length < 6) {
+          return 'Пароль должен быть больше 6 символов';
         } else if (val.trim() != widget.passController.text.trim()) {
           return "Пароли должны быть одинаковыми";
         } else {
@@ -236,14 +240,18 @@ Widget iconBackButton(BuildContext context) => IconButton(
       Navigator.pop(context);
     });
 
-Widget enterButton(GlobalKey<FormState> _formKey, Function _submitForm,
-        String text,) =>
+Widget enterButton(
+  GlobalKey<FormState> _formKey,
+  Function _submitForm,
+  String text,
+) =>
     GestureDetector(
         onTap: () async {
           if (_formKey.currentState!.validate()) {
             _formKey.currentState!.save();
             _submitForm();
-        }},
+          }
+        },
         child: Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
@@ -256,11 +264,9 @@ Widget enterButton(GlobalKey<FormState> _formKey, Function _submitForm,
           height: 70,
           width: 300,
           child: Center(
-              child:Text(
-                      text,
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Gilroy',
-                          fontSize: 17),
-                    )),
+              child: Text(
+            text,
+            style: TextStyle(
+                color: Colors.black, fontFamily: 'Gilroy', fontSize: 17),
+          )),
         ));

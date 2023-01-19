@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ghost_vpn/api/yokassa_api.dart';
 import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/models/payments_option.dart';
+import 'package:ghost_vpn/screens/services_screens/splash_start_screen.dart';
+import 'package:ghost_vpn/screens/services_screens/toggle_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/loader_widget.dart';
 import 'package:ghost_vpn/widgets/subscription_card_buy_widget.dart';
-import 'package:yookassa_payments_flutter/yookassa_payments_flutter.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({Key? key}) : super(key: key);
@@ -40,8 +39,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           setState(() {
             isLoading = false;
           });
-          Navigator.pushReplacementNamed(
-              context, RoutesGenerator.SPLASH_SCREEN);
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => SplashStartScreen())));
         }
       },
       child: Scaffold(

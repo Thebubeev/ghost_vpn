@@ -1,4 +1,10 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_vpn/models/firestore_user.dart';
+import 'package:ghost_vpn/screens/services_screens/expiration_screen.dart';
 import 'package:ghost_vpn/screens/services_screens/toggle_screen.dart';
 import 'package:ghost_vpn/services/shared_preferences_storage.dart';
 
@@ -11,16 +17,44 @@ class SplashStartScreen extends StatefulWidget {
 
 class _SplashStartScreenState extends State<SplashStartScreen> {
   final prefs = SharedPreferenceStorage();
+  Timer? timer;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  Timestamp? promoExpirationTime;
+  bool isTimetoPay = false;
   @override
   void initState() {
     init();
+    timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      checkFields();
+    });
     super.initState();
   }
 
-  @override
-  void dispose() {
-    if (!mounted) return;
-    super.dispose();
+  Future checkFields() async {
+    await users
+        .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .limit(1)
+        .get()
+        .then((snapshot) async {
+      if (snapshot.docs.isNotEmpty) {
+        setState(() async {
+          if (!mounted) return;
+          promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
+          isTimetoPay = await getTimeToPay(snapshot.docs.single.id);
+          if (isTimetoPay) {
+            timer?.cancel();
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => ExpirationScreen())));
+          }
+        });
+      }
+    }).catchError((error) {});
+  }
+
+  Future<bool> getTimeToPay(dynamic doc) async {
+    final expTime = Utils.toDateTime(promoExpirationTime);
+    final isInnerTimeToPay = expTime!.isBefore(DateTime.now());
+    return isInnerTimeToPay;
   }
 
   @override

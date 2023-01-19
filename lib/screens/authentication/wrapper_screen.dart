@@ -13,7 +13,7 @@ class Wrapper extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Image.asset(
-                'assets/ghostlogo.jpg',
+                'assets/ghost_logo.jpg',
                 fit: BoxFit.cover,
                 height: 200,
                 width: 200,

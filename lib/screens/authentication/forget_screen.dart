@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ghost_vpn/bloc/VPN_AUTH/vpn_auth_bloc.dart';
-import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/loader_widget.dart';
 import 'package:ghost_vpn/widgets/widget.dart';
@@ -79,7 +78,7 @@ class _ForgetScreenState extends State<ForgetScreen> {
                       ),
                       Text(
                         'Восстановить пароль',
-                        style: TextStyle(fontSize: 40, color: Colors.white),
+                        style: TextStyle(fontSize: 39, color: Colors.white),
                       ),
                       SizedBox(
                         height: 15,

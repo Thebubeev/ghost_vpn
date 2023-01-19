@@ -15,6 +15,11 @@ class VpnDisconnect extends VpnEvent {
   VpnDisconnect({required this.openVPN});
 }
 
+class VpnExitApp extends VpnEvent{
+  final OpenVPN openVPN;
+
+  VpnExitApp({required this.openVPN});}
+
 class VpnSubscriptionPay extends VpnEvent {
   final String title;
   final int value;

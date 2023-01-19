@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
-import 'package:ghost_vpn/screens/services_screens/subscription_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
@@ -92,7 +91,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<VpnBloc, VpnState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is VpnConnectedState) {
           if (!mounted) return;
           setState(() {
@@ -105,6 +104,16 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
           setState(() {
             isConnected = state.isConnected;
           });
+        }
+
+        if (state is VpnExitAppState) {
+          if (!mounted) return;
+          setState(() {
+            isConnected = state.isConnected;
+          });
+          await auth.signOut();
+          Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
+          print('User is out');
         }
       },
       child: Stack(
@@ -122,9 +131,14 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
               actions: [
                 IconButton(
                   onPressed: () async {
-                    await auth.signOut();
-                    Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
-                    print('User is out');
+                    if (isConnected) {
+                      BlocProvider.of<VpnBloc>(context)
+                          .add(VpnExitApp(openVPN: openvpn));
+                    } else {
+                      await auth.signOut();
+                      Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
+                      print('User is out');
+                    }
                   },
                   icon: Icon(
                     Icons.exit_to_app_outlined,

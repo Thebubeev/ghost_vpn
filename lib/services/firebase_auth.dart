@@ -83,7 +83,6 @@ class Auth implements AuthBase {
     final newUser = FirestoreUser(
       idUser: _firebaseAuth.currentUser!.uid,
       email: _firebaseAuth.currentUser!.email!,
-      isPaid: false,
       isPromo: '-1',
       lastCreationTime: DateTime.now(),
     );
@@ -126,7 +125,6 @@ class Auth implements AuthBase {
         final newUser = FirestoreUser(
           idUser: _firebaseAuth.currentUser!.uid,
           email: _firebaseAuth.currentUser!.email!,
-          isPaid: false,
           isPromo: '-1',
           lastCreationTime: DateTime.now(),
         );
@@ -144,7 +142,7 @@ class Auth implements AuthBase {
   Future<void> completePayment() async {
     try {
       DateTime promoTime = DateTime.now();
-      final expDay = promoTime.day + 31;
+      final expDay = promoTime.day + 30;
       final expMonth = promoTime.month;
       final expYear = promoTime.year;
       DateTime expTime = DateTime(expYear, expMonth, expDay);
@@ -156,7 +154,7 @@ class Auth implements AuthBase {
         if (snapshot.docs.isNotEmpty) {
           chatDocId = snapshot.docs.single.id;
           await users.doc(chatDocId).update({
-            'isPaid': true,
+            'isPromo': "2",
             'promoStartedTime': Utils.fromDateTimeToJson(promoTime),
             'promoExpirationTime': Utils.fromDateTimeToJson(expTime),
           });

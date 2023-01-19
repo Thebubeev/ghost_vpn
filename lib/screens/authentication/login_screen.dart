@@ -51,7 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
             _emailController.text = '';
             _passController.text = '';
           });
-          await auth.sendVerificationEmail();
+          try {
+            await auth.sendVerificationEmail();
+          } catch (e) {
+            print(e);
+          }
         }
 
         if (state is VpnAuthErrorState) {
@@ -64,8 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
             setState(() {
               _isLoading = false;
               _warning = state.warning;
-            _emailController.text = '';
-            _passController.text = '';
+              _emailController.text = '';
+              _passController.text = '';
             });
           }
         }
@@ -140,26 +144,29 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 70,
                               width: 300,
                               child: Center(
-                                  child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Войти с помощью Google',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Gilroy',
-                                        fontSize: 17),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
-                                  Image.asset(
-                                    'assets/google.png',
-                                    fit: BoxFit.cover,
-                                    height: 30,
-                                    width: 30,
-                                  )
-                                ],
+                                  child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Войти с помощью Google',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Gilroy',
+                                          fontSize: 17),
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Image.asset(
+                                      'assets/google.png',
+                                      fit: BoxFit.cover,
+                                      height: 30,
+                                      width: 30,
+                                    )
+                                  ],
+                                ),
                               )),
                             )),
                         TextButton(
@@ -172,7 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Container(
                               child: Text(
                                 'Восстановить пароль',
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ))
                       ],
