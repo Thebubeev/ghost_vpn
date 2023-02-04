@@ -91,8 +91,11 @@ class _PromoScreenState extends State<PromoScreen> {
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          'Привет, друг.\t Рады привествовать вас на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное использование нашего сервиса на протяжение 5 дней.\n\nУдачного дня.',
-                          style: TextStyle(color: Colors.white, fontSize: 19),
+                          'Привет, друг. Рады привествовать тебя на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное использование нашего сервиса на протяжение 5 дней.\n\nУдачного дня.',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 19,
+                          ),
                         ),
                       ),
                       Align(

@@ -7,18 +7,18 @@ class VpnInitialize extends VpnEvent {}
 
 class VpnConnect extends VpnEvent {
   final OpenVPN openVPN;
+  
   VpnConnect({required this.openVPN});
 }
 
 class VpnDisconnect extends VpnEvent {
   final OpenVPN openVPN;
-  VpnDisconnect({required this.openVPN});
+  final dynamic chatDocId;
+  VpnDisconnect(
+      {required this.openVPN, required this.chatDocId});
 }
 
-class VpnExitApp extends VpnEvent{
-  final OpenVPN openVPN;
 
-  VpnExitApp({required this.openVPN});}
 
 class VpnSubscriptionPay extends VpnEvent {
   final String title;

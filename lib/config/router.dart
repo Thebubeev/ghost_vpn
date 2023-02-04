@@ -55,6 +55,6 @@ class RoutesGenerator {
       case REGISTER:
         return MaterialPageRoute(builder: (_) => RegisterScreen());
     }
-    return MaterialPageRoute(builder: (_) => MyApp());
+    return MaterialPageRoute(builder: (_) => ToggleScreen());
   }
 }

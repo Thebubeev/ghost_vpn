@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:ghost_vpn/bloc/VPN_AUTH/vpn_auth_bloc.dart';
 import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/screens/services_screens/splash_start_screen.dart';
+import 'package:ghost_vpn/screens/services_screens/toggle_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,10 +23,15 @@ class MyApp extends StatelessWidget {
         BlocProvider<VpnBloc>(create: (_) => VpnBloc()),
         BlocProvider<VpnAuthBloc>(create: (_) => VpnAuthBloc())
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
+          title: 'GhostVPN',
+          builder: EasyLoading.init(),
+          theme: ThemeData(
+              primaryColor: Colors.white,
+              scaffoldBackgroundColor: Colors.white54),
           onGenerateRoute: RoutesGenerator.generateRoute,
           debugShowCheckedModeBanner: false,
-          home: SplashStartScreen()),
+          home: ToggleScreen()),
     );
   }
 }

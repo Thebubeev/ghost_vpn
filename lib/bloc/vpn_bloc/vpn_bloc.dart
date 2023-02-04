@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ghost_vpn/api/yokassa_api.dart';
+import 'package:ghost_vpn/models/firebase_config.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
@@ -10,7 +12,10 @@ part 'vpn_event.dart';
 part 'vpn_state.dart';
 
 class VpnBloc extends Bloc<VpnEvent, VpnState> {
+  CollectionReference collectionReference_configs =
+      FirebaseFirestore.instance.collection('configs');
   final auth = Auth();
+
   VpnBloc() : super(VpnInitialState()) {
     on<VpnSubscriptionPay>((event, emit) async {
       try {
@@ -46,35 +51,80 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
       }
     });
 
-    on<VpnExitApp>((event, emit) {
-      event.openVPN.disconnect();
-      emit(VpnExitAppState(isConnected: false));
+    on<VpnConnect>((event, emit) async {
+      emit(VpnLoadingState());
+
+      await collectionReference_configs.get().then((snapshots) async {
+        List<FirebaseConfig> configs = [];
+        if (snapshots.docs.isNotEmpty) {
+          snapshots.docs.forEach((element) {
+            configs.add(FirebaseConfig(
+                name: element.get('name'), active: element.get('active')));
+          });
+
+          String configName = configs[0].name;
+          int min = configs[0].active;
+          for (int i = 0; i < configs.length; i++) {
+            if (configs[i].active < min) {
+              configName = configs[i].name;
+            }
+          }
+          final path = await auth.getServerConfig(configName);
+          final remoteConfig = await File(path).readAsString();
+          print(configName);
+          print(path);
+
+          dynamic chatDocId;
+
+          await collectionReference_configs
+              .where('name', isEqualTo: configName)
+              .limit(1)
+              .get()
+              .then((snapshot) async {
+            if (snapshots.docs.isNotEmpty) {
+              chatDocId = snapshot.docs.single.id;
+              // await collectionReference_configs
+              //     .doc(chatDocId)
+              //     .update({'active': FieldValue.increment(2)});
+
+              DocumentReference documentReference = FirebaseFirestore.instance
+                  .collection('configs')
+                  .doc(chatDocId);
+              FirebaseFirestore.instance.runTransaction((transaction) async {
+                final snapshot = await transaction.get(documentReference);
+                final newActive = snapshot.get('active') + 1;
+                await transaction
+                    .update(documentReference, {'active': newActive});
+              }).catchError((e) {
+                print(e);
+              });
+            }
+          });
+
+          try {
+            event.openVPN.connect(
+              remoteConfig,
+              'GhostVPN',
+              username: '',
+              password: '',
+              bypassPackages: [],
+              certIsRequired: true,
+            );
+            emit(VpnConnectedState(isConnected: true, chatDocId: chatDocId));
+          } catch (e) {
+            print(e);
+            emit(VpnErrorState());
+          }
+        }
+      });
     });
 
     on<VpnDisconnect>((event, emit) async {
       event.openVPN.disconnect();
-      emit(VpnDisconnectedState(isConnected: false));
-    });
-
-    on<VpnConnect>((event, emit) async {
-      final config = await rootBundle.loadString('assets/__Admin2.txt');
-      try {
-        event.openVPN.connect(
-          config,
-          'GhostVPN',
-          username: '',
-          password: '',
-          bypassPackages: [],
-          certIsRequired: true,
-        );
-      } catch (e) {
-        print(e);
-        emit(VpnErrorState());
-      }
-
-      emit(VpnConnectedState(isConnected: true));
+      emit(VpnDisconnectedState());
     });
   }
+
   Future makePayment(String title, int value) async {
     final inputData = TokenizationModuleInputData(
         returnUrl: 'https://ddpub.ru/success',

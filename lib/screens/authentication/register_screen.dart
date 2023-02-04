@@ -41,9 +41,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           setState(() {
             _isLoading = false;
             _warning = 'Пожалуйста, подтвердите вашу почту.';
-            _emailController.text = '';
-            _passController.text = '';
-            _confirmPassController.text = '';
           });
           await auth.sendVerificationEmail();
         }
@@ -58,9 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             setState(() {
               _isLoading = false;
               _warning = state.warning;
-              _emailController.text = '';
-              _passController.text = '';
-              _confirmPassController.text = '';
             });
           }
         }
@@ -117,7 +111,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           _formKey,
                           _submitForm,
                           'Зарегистрироваться',
-                        )
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              BlocProvider.of<VpnAuthBloc>(context)
+                                  .add(VpnLoginWithGoogleEvent());
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10.0),
+                                    bottomLeft: Radius.circular(10.0),
+                                    bottomRight: Radius.circular(10.0),
+                                    topRight: Radius.circular(10.0),
+                                  ),
+                                  color: Colors.white),
+                              height: 70,
+                              width: 300,
+                              child: Center(
+                                  child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Войти с помощью Google',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Gilroy',
+                                          fontSize: 17),
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Image.asset(
+                                      'assets/google.png',
+                                      fit: BoxFit.cover,
+                                      height: 30,
+                                      width: 30,
+                                    )
+                                  ],
+                                ),
+                              )),
+                            )),
                       ],
                     ),
                   ),

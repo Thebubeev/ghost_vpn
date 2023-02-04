@@ -48,8 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
           setState(() {
             _isLoading = false;
             _warning = 'Пожалуйста, подтвердите вашу почту.';
-            _emailController.text = '';
-            _passController.text = '';
           });
           try {
             await auth.sendVerificationEmail();
@@ -68,8 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
             setState(() {
               _isLoading = false;
               _warning = state.warning;
-              _emailController.text = '';
-              _passController.text = '';
             });
           }
         }

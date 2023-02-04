@@ -47,7 +47,6 @@ class _ForgetScreenState extends State<ForgetScreen> {
           } else {
             setState(() {
               _isLoading = false;
-              _emailController.text = '';
               _warning = state.warning;
             });
           }

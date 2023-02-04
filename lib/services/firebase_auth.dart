@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:ghost_vpn/models/firestore_user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:path_provider/path_provider.dart';
 // import 'package:google_sign_in/google_sign_in.dart';
 
 class Users {
@@ -29,10 +32,12 @@ abstract class AuthBase {
   Future<void> signOut();
   Future<Users> signInWithGoogle();
   Future<void> sendVerificationEmail();
+  Future getServerConfig(String configName);
 }
 
 class Auth implements AuthBase {
   final _firebaseAuth = FirebaseAuth.instance;
+  final _firebaseStorage = FirebaseStorage.instance;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   dynamic chatDocId;
 
@@ -163,5 +168,14 @@ class Auth implements AuthBase {
     } catch (error) {
       print(error);
     }
+  }
+
+
+  @override
+  Future getServerConfig(String configName) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/${configName}.txt');
+    await _firebaseStorage.ref('configs/${configName}.txt').writeToFile(file);
+    return file.path;
   }
 }

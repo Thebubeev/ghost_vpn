@@ -43,7 +43,10 @@ class _ExpirationScreenState extends State<ExpirationScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'Вот и закончилась подписка. Надеюсь ты готов перейти на страницу оплаты для продления подписки.',
-                  style: TextStyle(color: Colors.white, fontSize: 19),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                  ),
                 ),
               ),
               Align(

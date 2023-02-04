@@ -1,4 +1,4 @@
-package com.example.ghost_vpn;
+package ghost.vpn.com;
 
 import io.flutter.embedding.android.FlutterActivity;
 import id.laskarmedia.openvpn_flutter.OpenVPNFlutterPlugin;

@@ -61,8 +61,8 @@ class _ToggleScreenState extends State<ToggleScreen> {
         });
       }
       if (isPromo == '1' || isPromo == '2') {
+        if (!mounted) return;
         setState(() async {
-          if (!mounted) return;
           promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
           isTimetoPay = await getTimeToPay(snapshot.docs.single.id);
         });
@@ -73,12 +73,6 @@ class _ToggleScreenState extends State<ToggleScreen> {
   Future<bool> getTimeToPay(dynamic doc) async {
     final expTime = Utils.toDateTime(promoExpirationTime);
     final isInnerTimeToPay = expTime!.isBefore(DateTime.now());
-    if (isInnerTimeToPay) {
-      await users.doc(doc).update({ 'isPromo': '1'});
-      setState(() {
-        isPromo = '1';
-      });
-    }
     return isInnerTimeToPay;
   }
 
@@ -116,13 +110,13 @@ class _ToggleScreenState extends State<ToggleScreen> {
                     );
                   } else if (isTimetoPay &&
                       isEmailVerified! &&
-                      isPromo == '1' ) {
+                      isPromo == '1') {
                     return ExpirationScreen();
                   } else if (isEmailVerified! &&
                       isPromo == '2' &&
-                      isTimetoPay == false ) {
+                      isTimetoPay == false) {
                     return VpnMainScreen();
-                  } 
+                  }
                 }
                 return LoaderWidget();
               });
