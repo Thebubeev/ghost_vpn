@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,11 @@ import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/models/firestore_user.dart';
 import 'package:ghost_vpn/screens/services_screens/expiration_screen.dart';
-import 'package:ghost_vpn/screens/services_screens/support_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
+import 'package:ghost_vpn/services/local_notifications.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
+import 'package:ghost_vpn/widgets/drawer_vpn_main_widget.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 class VpnMainScreen extends StatefulWidget {
@@ -29,7 +32,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   late VpnStatus? status;
   late VPNStage stage;
 
-  String stringStage = 'START';
+  String stringStage = 'СТАРТ';
   dynamic chatDocId;
   dynamic chatDocConfigId;
 
@@ -44,8 +47,11 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
 
   @override
   void initState() {
-    timer = Timer.periodic(Duration(seconds: 60), (timer) async {
-      checkFields();
+    initializeDateFormatting();
+    listenNotificationStatus();
+    checkPromoExpirationTime();
+    timer = Timer.periodic(Duration(seconds: 50), (timer) async {
+      await checkFields();
     });
     openvpn = OpenVPN(
         onVpnStatusChanged: _onVpnStatusChanged,
@@ -56,6 +62,32 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
         localizedDescription: "Ghost VPN");
 
     super.initState();
+  }
+
+  listenNotificationStatus() {
+    AwesomeNotifications().actionStream.listen(
+      (ReceivedAction receivedAction) {
+        if (receivedAction.buttonKeyPressed == 'yes') {
+          BlocProvider.of<VpnBloc>(context)
+              .add(VpnDisconnect(openVPN: openvpn, chatDocId: chatDocConfigId));
+        }
+      },
+    );
+  }
+
+  Future checkPromoExpirationTime() async {
+    await users
+        .where('email', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .limit(1)
+        .get()
+        .then((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        if (!mounted) return;
+        setState(() {
+          promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
+        });
+      }
+    });
   }
 
   Future checkFields() async {
@@ -70,6 +102,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
           promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
           isTimetoPay = await getTimeToPay(snapshot.docs.single.id);
           if (isTimetoPay) {
+            await LocalNotifications().showNotification(context);
             timer?.cancel();
             await users.doc(snapshot.docs.single.id).update({'isPromo': '1'});
             Navigator.push(context,
@@ -82,7 +115,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
 
   Future<bool> getTimeToPay(dynamic doc) async {
     final expTime = Utils.toDateTime(promoExpirationTime);
-    final isInnerTimeToPay = expTime!.isBefore(DateTime.now());
+    final isInnerTimeToPay = DateTime.now().isAfter(expTime!);
     return isInnerTimeToPay;
   }
 
@@ -124,7 +157,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   Widget build(BuildContext context) {
     return BlocListener<VpnBloc, VpnState>(
       listener: (context, state) async {
-        if (state is VpnLoadingState) {
+        if (state is VpnLoadingVpnState) {
           if (!mounted) return;
           await EasyLoading.show(
               status: "Загрузка", maskType: EasyLoadingMaskType.black);
@@ -137,9 +170,21 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             isConnected = true;
             chatDocConfigId = state.chatDocId;
           });
+
           await Future.delayed(Duration(seconds: 4)).then((_) {
             EasyLoading.showSuccess('Все прошло успешно!');
           });
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+                id: 1,
+                locked: true,
+                channelKey: 'ghost_vpn_key',
+                title: 'GhostVPN',
+                body: 'Вы подключены к GhostVPN'),
+            actionButtons: <NotificationActionButton>[
+              NotificationActionButton(key: 'yes', label: 'Отключить'),
+            ],
+          );
         }
 
         if (state is VpnDisconnectedState) {
@@ -148,14 +193,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             stringStage = 'СТАРТ';
             isConnected = false;
           });
-          DocumentReference documentReference = FirebaseFirestore.instance
-              .collection('configs')
-              .doc(chatDocConfigId);
-          FirebaseFirestore.instance.runTransaction((transaction) async {
-            final snapshot = await transaction.get(documentReference);
-            final newActive = snapshot.get('active') - 1;
-            await transaction.update(documentReference, {'active': newActive});
-          });
+          await AwesomeNotifications().dismiss(1);
         }
       },
       child: WillPopScope(
@@ -169,7 +207,8 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
               height: MediaQuery.of(context).size.height,
             ),
             Scaffold(
-              resizeToAvoidBottomInset: false,
+              drawer: DrawerVpnMainWidget(
+                  promoExpirationTime: promoExpirationTime, auth: auth),
               backgroundColor: Colors.transparent,
               appBar: AppBar(
                 actions: [
@@ -179,6 +218,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                         EasyLoading.showInfo('Отключите ВПН!');
                       } else {
                         await auth.signOut();
+                        timer?.cancel();
                         Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
                         print('User is out');
                       }
@@ -190,24 +230,12 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                   ),
                 ],
                 backgroundColor: Colors.black,
-                automaticallyImplyLeading: false,
                 centerTitle: true,
                 title: Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                          onPressed: () async {
-                            await showGeneralDialog(
-                                context: context,
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) {
-                                  return SupportScreen();
-                                });
-                          },
-                          icon: Icon(Icons.telegram_outlined,
-                              color: Colors.white)),
                       RichText(
                         text: const TextSpan(
                           text: 'Ghost',
@@ -237,83 +265,97 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                   ),
                 ),
               ),
-              body: Padding(
-                padding: EdgeInsets.zero,
+              body: SafeArea(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.transparent),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 190),
+                        child: Text(
+                          isConnected ? status!.duration! : "00:00:00",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 42,
+                              fontWeight: FontWeight.w300),
                         ),
-                        onPressed: () async {
-                          isConnected
-                              ? {
-                                  BlocProvider.of<VpnBloc>(context).add(
-                                      VpnDisconnect(
-                                          openVPN: openvpn,
-                                          chatDocId: chatDocId))
-                                }
-                              : {
-                                  BlocProvider.of<VpnBloc>(context)
-                                      .add(VpnConnect(
-                                    openVPN: openvpn,
-                                  ))
-                                };
-                        },
-                        child: Material(
-                            elevation: 3,
-                            borderRadius: BorderRadius.circular(150),
-                            child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Container(
-                                    height: 140,
-                                    width: 140,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.power_settings_new,
-                                          size: 34,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          stringStage,
-                                          style: const TextStyle(
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.transparent),
+                          ),
+                          onPressed: () async {
+                            isConnected
+                                ? {
+                                    BlocProvider.of<VpnBloc>(context).add(
+                                        VpnDisconnect(
+                                            openVPN: openvpn,
+                                            chatDocId: chatDocConfigId))
+                                  }
+                                : {
+                                    BlocProvider.of<VpnBloc>(context)
+                                        .add(VpnConnect(
+                                      openVPN: openvpn,
+                                    ))
+                                  };
+                          },
+                          child: Material(
+                              elevation: 3,
+                              borderRadius: BorderRadius.circular(150),
+                              child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Container(
+                                      height: 140,
+                                      width: 140,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.power_settings_new,
+                                            size: 34,
                                             color: Colors.white,
-                                            fontSize: 23,
-                                            fontWeight: FontWeight.w100,
                                           ),
-                                        ),
-                                      ],
-                                    )))),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            stringStage,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 23,
+                                              fontWeight: FontWeight.w100,
+                                            ),
+                                          ),
+                                        ],
+                                      )))),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(
-                          top: 20,
+                          bottom: 30,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ContainerSpeedWidget(
+                              isDownload: true,
                               speed: isConnected ? status!.byteIn! : "0",
                               type: 'Скачано',
                             ),
                             ContainerSpeedWidget(
+                              isDownload: false,
                               speed: isConnected ? status!.byteOut! : "0",
                               type: 'Загружено',
                             ),

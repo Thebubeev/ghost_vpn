@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           height: 15,
                         ),
-                        TextFormPassField(passController: _passController),
+                        TextFormPassField(passController: _passController, isLoginScreen: false,),
                         SizedBox(
                           height: 15,
                         ),

@@ -57,7 +57,9 @@ class _TextFormEmailFieldState extends State<TextFormEmailField> {
 
 class TextFormPassField extends StatefulWidget {
   final TextEditingController passController;
-  const TextFormPassField({Key? key, required this.passController})
+  final bool isLoginScreen;
+  const TextFormPassField(
+      {Key? key, required this.passController, required this.isLoginScreen})
       : super(key: key);
 
   @override
@@ -97,15 +99,23 @@ class _TextFormPassFieldState extends State<TextFormPassField> {
             ),
           )),
       controller: widget.passController,
-      validator: (val) {
-        if (val!.isEmpty || val == '') {
-          return 'Введите пароль';
-        } else if (val.length < 6) {
-          return 'Пароль должен быть больше 6 символов';
-        } else {
-          return null;
-        }
-      },
+      validator: widget.isLoginScreen
+          ? (val) {
+              if (val!.isEmpty || val == '') {
+                return 'Введите пароль';
+              } else {
+                return null;
+              }
+            }
+          : (val) {
+               if (val!.isEmpty || val == '') {
+                return 'Введите пароль';
+              } else if (val.length < 6) {
+                return 'Пароль должен быть больше 6 символов';
+              } else {
+                return null;
+              }
+            },
       obscureText: _isPasswordVisible ? false : true,
       onSaved: (val) {
         setState(() {

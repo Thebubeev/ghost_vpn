@@ -19,7 +19,6 @@ class _PromoScreenState extends State<PromoScreen> {
   dynamic chatDocId;
 
   bool _isLoading = false;
-  String? _warning;
 
   @override
   void initState() {
@@ -30,7 +29,6 @@ class _PromoScreenState extends State<PromoScreen> {
   @override
   void dispose() {
     if (!mounted) return;
-    _warning = null;
     super.dispose();
   }
 
@@ -80,18 +78,13 @@ class _PromoScreenState extends State<PromoScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ShowAlert(
-                        warning: _warning,
-                        function: () {
-                          setState(() {
-                            _warning = null;
-                          });
-                        },
+                      const SizedBox(
+                        height: 5,
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.only(left: 25, bottom: 20),
                         child: Text(
-                          'Привет, друг. Рады привествовать тебя на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное использование нашего сервиса на протяжение 5 дней.\n\nУдачного дня.',
+                          'Привет, друг. Рады привествовать тебя на нашем VPN сервисе.\tПредлагаем в качестве маленького подарка: бесплатное использование нашего сервиса на протяжение 5 дней.\nУдачного дня.',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 19,

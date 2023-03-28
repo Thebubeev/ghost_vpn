@@ -14,14 +14,14 @@ part 'vpn_state.dart';
 class VpnBloc extends Bloc<VpnEvent, VpnState> {
   CollectionReference collectionReference_configs =
       FirebaseFirestore.instance.collection('configs');
-  final auth = Auth();
+  AuthBase auth = Auth();
 
   VpnBloc() : super(VpnInitialState()) {
     on<VpnSubscriptionPay>((event, emit) async {
       try {
         final payment = await makePayment(event.title, event.value);
         if (payment != null) {
-          emit(VpnLoadingState());
+          emit(VpnLoadingSubscriptionState());
           final yokassaPayment = await YokassaApi().makeYokassaPayment(
               payment.token, event.title, event.value.toString());
           if (yokassaPayment != null && yokassaPayment.confirmation != null) {
@@ -33,7 +33,7 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
               final currentPayment =
                   await YokassaApi().checkYokassaPayment(yokassaPayment.id!);
               if (currentPayment?.status == 'succeeded') {
-                await auth.completePayment();
+                await Auth().completePayment(currentPayment!.description!);
                 emit(VpnSubscriptionPaidState());
               } else {
                 emit(VpnReturnState());
@@ -52,7 +52,7 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
     });
 
     on<VpnConnect>((event, emit) async {
-      emit(VpnLoadingState());
+      emit(VpnLoadingVpnState());
 
       await collectionReference_configs.get().then((snapshots) async {
         List<FirebaseConfig> configs = [];
@@ -69,7 +69,8 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
               configName = configs[i].name;
             }
           }
-          final path = await auth.getServerConfig(configName);
+          final path =
+              await auth.getFirebaseDocuments(configName, 'txt', 'configs');
           final remoteConfig = await File(path).readAsString();
           print(configName);
           print(path);
@@ -121,6 +122,13 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
 
     on<VpnDisconnect>((event, emit) async {
       event.openVPN.disconnect();
+      DocumentReference documentReference =
+          FirebaseFirestore.instance.collection('configs').doc(event.chatDocId);
+      FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(documentReference);
+        final newActive = snapshot.get('active') - 1;
+        await transaction.update(documentReference, {'active': newActive});
+      });
       emit(VpnDisconnectedState());
     });
   }

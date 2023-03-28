@@ -11,12 +11,13 @@ class VpnConnectedState extends VpnState {
   VpnConnectedState({required this.isConnected, required this.chatDocId});
 }
 
-class VpnDisconnectedState extends VpnState {
-}
+class VpnDisconnectedState extends VpnState {}
 
 class VpnSubscriptionPaidState extends VpnState {}
 
-class VpnLoadingState extends VpnState {}
+class VpnLoadingVpnState extends VpnState {}
+
+class VpnLoadingSubscriptionState extends VpnState {}
 
 class VpnReturnState extends VpnState {}
 

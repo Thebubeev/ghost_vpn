@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(
                           height: 15,
                         ),
-                        TextFormPassField(passController: _passController),
+                        TextFormPassField(passController: _passController, isLoginScreen: true,),
                         SizedBox(
                           height: 30,
                         ),

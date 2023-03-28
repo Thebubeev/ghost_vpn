@@ -90,13 +90,15 @@ class _ToggleScreenState extends State<ToggleScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Scaffold(
+            backgroundColor: Colors.black,
             body: Text('Error ${snapshot.error}'),
           );
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
           return StreamBuilder<User?>(
-              stream: FirebaseAuth.instance.authStateChanges(),
+              stream:
+                  FirebaseAuth.instance.authStateChanges().asBroadcastStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
                   final email = snapshot.data?.email;

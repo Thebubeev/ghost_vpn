@@ -4,17 +4,17 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 mixin Constants {
-  static const secretKey = "test_bIliC6BtVBR9nsRORMoysSSfwOSKbjLffnF8Qth505g";
+  static const secretKey = "live_GJuV8iE5UsSJDrMXAdG0jwdUBrB5WaH7QC99rVGBE6I";
   static const secretMobileKey =
-      "test_OTY0NzY2f_SIZ3JMqHPYfAT-Zwo6BP0u12Ns0orep0c";
-  static const shopId = '964766';
+      "live_MjAzNjMw8nGnLbBLdkRopkVXIFlXUvkXoJX43Z_cxik";
+  static const shopId = '203630';
   static const clientId = '11q73cqv3htff22k0md92f3otk8apnel';
 }
 
 class YokassaApi {
   Future<YokassaPayment?> checkYokassaPayment(String token) async {
     final credentials =
-        '964766:test_bIliC6BtVBR9nsRORMoysSSfwOSKbjLffnF8Qth505g';
+        '203630:live_GJuV8iE5UsSJDrMXAdG0jwdUBrB5WaH7QC99rVGBE6I';
 
     String basicAuth = 'Basic ' + base64.encode(utf8.encode(credentials));
 
@@ -33,7 +33,7 @@ class YokassaApi {
   Future<YokassaPayment?> makeYokassaPayment(
       String token, String descriptionOfOrder, String value) async {
     final credentials =
-        '964766:test_bIliC6BtVBR9nsRORMoysSSfwOSKbjLffnF8Qth505g';
+        '203630:live_GJuV8iE5UsSJDrMXAdG0jwdUBrB5WaH7QC99rVGBE6I';
 
     String basicAuth = 'Basic ' + base64.encode(utf8.encode(credentials));
 
@@ -46,7 +46,7 @@ class YokassaApi {
             },
             body: json.encode(<String, dynamic>{
               "payment_token": token,
-              "amount": {"value": value, "currency": "RUB"},
+              "amount": {"value": "10", "currency": "RUB"},
               "capture": true,
               "confirmation": {
                 "type": "redirect",

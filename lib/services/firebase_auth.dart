@@ -27,12 +27,12 @@ abstract class AuthBase {
     String email,
     String password,
   );
-  Future<void> completePayment();
+  Future<void> completePayment(String descr);
   Future<void> resetPasswordUsingEmail(String email);
   Future<void> signOut();
   Future<Users> signInWithGoogle();
   Future<void> sendVerificationEmail();
-  Future getServerConfig(String configName);
+  Future<String> getFirebaseDocuments(String configName, String type, String nameOfDoc);
 }
 
 class Auth implements AuthBase {
@@ -144,12 +144,23 @@ class Auth implements AuthBase {
   }
 
   @override
-  Future<void> completePayment() async {
+  Future<void> completePayment(String descr) async {
     try {
       DateTime promoTime = DateTime.now();
-      final expDay = promoTime.day + 30;
-      final expMonth = promoTime.month;
-      final expYear = promoTime.year;
+      int expDay = promoTime.day;
+      int expMonth = promoTime.month;
+      int expYear = promoTime.year;
+      switch (descr) {
+        case 'Подписка на месяц':
+          expDay = promoTime.day + 31;
+          break;
+        case 'Подписка на полгода':
+          expMonth = promoTime.month + 6;
+          break;
+        case 'Подписка на год':
+          expYear = promoTime.year + 1;
+          break;
+      }
       DateTime expTime = DateTime(expYear, expMonth, expDay);
       await users
           .where('email', isEqualTo: _firebaseAuth.currentUser!.email)
@@ -170,12 +181,11 @@ class Auth implements AuthBase {
     }
   }
 
-
   @override
-  Future getServerConfig(String configName) async {
+  Future<String> getFirebaseDocuments(String configName, String type, String nameOfDoc) async {
     final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/${configName}.txt');
-    await _firebaseStorage.ref('configs/${configName}.txt').writeToFile(file);
+    final file = File('${dir.path}/${configName}.$type');
+    await _firebaseStorage.ref('$nameOfDoc/${configName}.$type').writeToFile(file);
     return file.path;
   }
 }

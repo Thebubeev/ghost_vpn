@@ -40,9 +40,9 @@ class _ExpirationScreenState extends State<ExpirationScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.only(left: 25, bottom: 20),
                 child: Text(
-                  'Вот и закончилась подписка. Надеюсь ты готов перейти на страницу оплаты для продления подписки.',
+                  'Вот и закончилась подписка. Надеюсь вы остались довольны.\nДля продление тарифа, перейдите\nна страницу оплаты.',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 19,
@@ -52,8 +52,8 @@ class _ExpirationScreenState extends State<ExpirationScreen> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(
+                  onTap: () async {
+                    await Navigator.pushNamed(
                         context, RoutesGenerator.SUBCRIPTION_SCREEN);
                   },
                   child: Container(
