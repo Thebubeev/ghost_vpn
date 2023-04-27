@@ -137,13 +137,13 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
     final inputData = TokenizationModuleInputData(
         returnUrl: 'https://ddpub.ru/success',
         moneyAuthClientId: Constants.clientId,
-        tokenizationSettings: TokenizationSettings(PaymentMethodTypes.all),
+        tokenizationSettings: TokenizationSettings(PaymentMethodTypes.bankCard),
         clientApplicationKey: Constants.secretMobileKey,
         title: 'GhostVPN',
         applicationScheme: 'ghostvpn_scheme',
         subtitle: title,
         amount: Amount(value: value.toDouble(), currency: Currency.rub),
-        savePaymentMethod: SavePaymentMethod.userSelects,
+        savePaymentMethod: SavePaymentMethod.off,
         shopId: Constants.shopId);
 
     try {

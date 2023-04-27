@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/models/firestore_user.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 
@@ -34,7 +35,7 @@ class VpnAuthBloc extends Bloc<VpnAuthEvent, VpnAuthState> {
       try {
         await auth.signInWithGoogle().then((value) {
           if (value.uid != null) {
-            emit(VpnAuthNavigatorState(route: '/home'));
+            emit(VpnAuthNavigatorState(route: RoutesGenerator.SPLASH_SCREEN));
           }
         });
       } catch (e) {
@@ -106,7 +107,8 @@ class VpnAuthBloc extends Bloc<VpnAuthEvent, VpnAuthState> {
             .signInWithEmailAndPassword(
                 event.login.trim(), event.password.trim())
             .then((_) async => _firebaseAuth.currentUser!.emailVerified
-                ? emit(VpnAuthNavigatorState(route: '/home'))
+                ? emit(
+                    VpnAuthNavigatorState(route: RoutesGenerator.SPLASH_SCREEN))
                 : {emit(VpnAuthLoginToastState())});
       } catch (error) {
         String _warning = 'Что-то прошло не так...';

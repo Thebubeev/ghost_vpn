@@ -7,7 +7,7 @@ class YokassaPayment {
   String? createdAt;
   String? description;
   Metadata? metadata;
-  PaymentMethod? paymentMethod;
+  PaymentMethodData? paymentMethod;
   Recipient? recipient;
   bool? refundable;
   bool? test;
@@ -41,7 +41,7 @@ class YokassaPayment {
         ? new Metadata.fromJson(json['metadata'])
         : null;
     paymentMethod = json['payment_method'] != null
-        ? new PaymentMethod.fromJson(json['payment_method'])
+        ? new PaymentMethodData.fromJson(json['payment_method'])
         : null;
     recipient = json['recipient'] != null
         ? new Recipient.fromJson(json['recipient'])
@@ -130,14 +130,14 @@ class Metadata {
   }
 }
 
-class PaymentMethod {
+class PaymentMethodData {
   String? type;
   String? id;
   bool? saved;
 
-  PaymentMethod({this.type, this.id, this.saved});
+  PaymentMethodData({this.type, this.id, this.saved});
 
-  PaymentMethod.fromJson(Map<String, dynamic> json) {
+  PaymentMethodData.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     id = json['id'];
     saved = json['saved'];

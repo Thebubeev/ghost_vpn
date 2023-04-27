@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 mixin Constants {
   static const secretKey = "live_GJuV8iE5UsSJDrMXAdG0jwdUBrB5WaH7QC99rVGBE6I";
   static const secretMobileKey =
-      "live_MjAzNjMw8nGnLbBLdkRopkVXIFlXUvkXoJX43Z_cxik";
+      "live_MjAzNjMwZ-oxcKiZ7GuFpf00Bdw9aRO2m9v_RHAtigo";
   static const shopId = '203630';
   static const clientId = '11q73cqv3htff22k0md92f3otk8apnel';
 }
@@ -46,7 +46,7 @@ class YokassaApi {
             },
             body: json.encode(<String, dynamic>{
               "payment_token": token,
-              "amount": {"value": "10", "currency": "RUB"},
+              "amount": {"value": value, "currency": "RUB"},
               "capture": true,
               "confirmation": {
                 "type": "redirect",

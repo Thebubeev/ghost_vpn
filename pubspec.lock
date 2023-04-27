@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  check_vpn_connection:
+    dependency: "direct main"
+    description:
+      name: check_vpn_connection
+      sha256: "68029b66124eb5de2bc877f516ad9773f8b57e0a9ccf5c64609bb7cb8f14f3a0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   checked_yaml:
     dependency: transitive
     description:
@@ -262,6 +270,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_android:
+    dependency: "direct main"
+    description:
+      name: flutter_android
+      sha256: a00ea0806c1030cd554958f11994b87d8e0131ee8c6325209f4d8ef8bbad6795
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   flutter_bloc:
     dependency: "direct main"
     description:

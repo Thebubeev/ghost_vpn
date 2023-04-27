@@ -35,6 +35,10 @@ xmlns:tools="http://schemas.android.com/tools"
         android:allowBackup="false"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+            <service
+        android:name="com.example.app.notifications.NotificationService"
+        android:enabled="true"
+        android:exported="false" />
         <provider
     android:name="androidx.core.content.FileProvider"
     android:authorities="${applicationId}.provider"

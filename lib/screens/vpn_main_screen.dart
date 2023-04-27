@@ -9,7 +9,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:ghost_vpn/bloc/vpn_bloc/vpn_bloc.dart';
 import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/models/firestore_user.dart';
-import 'package:ghost_vpn/screens/services_screens/expiration_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/services/local_notifications.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
@@ -33,7 +32,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   late VPNStage stage;
 
   String stringStage = 'СТАРТ';
-  dynamic chatDocId;
   dynamic chatDocConfigId;
 
   Timer? timer;
@@ -64,13 +62,14 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     super.initState();
   }
 
-  listenNotificationStatus() {
+  listenNotificationStatus() async {
     AwesomeNotifications().actionStream.listen(
       (ReceivedAction receivedAction) {
         if (receivedAction.buttonKeyPressed == 'yes') {
           BlocProvider.of<VpnBloc>(context)
               .add(VpnDisconnect(openVPN: openvpn, chatDocId: chatDocConfigId));
         }
+      
       },
     );
   }
@@ -105,8 +104,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             await LocalNotifications().showNotification(context);
             timer?.cancel();
             await users.doc(snapshot.docs.single.id).update({'isPromo': '1'});
-            Navigator.push(context,
-                MaterialPageRoute(builder: ((context) => ExpirationScreen())));
+            Navigator.pushNamed(context, RoutesGenerator.SPLASH_SCREEN);
           }
         });
       }
@@ -219,7 +217,8 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                       } else {
                         await auth.signOut();
                         timer?.cancel();
-                        Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
+                        Navigator.pushNamed(
+                            context, RoutesGenerator.SPLASH_SCREEN);
                         print('User is out');
                       }
                     },
