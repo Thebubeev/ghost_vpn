@@ -185,6 +185,14 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
               NotificationActionButton(key: 'yes', label: 'Отключить'),
             ],
           );
+          AwesomeNotifications().actionStream.listen((event) {
+            print('event received!');
+            print(event.toMap().toString());
+            final vpnbloc = BlocProvider.of<VpnBloc>(context);
+            vpnbloc.add(
+              VpnDisconnect(openVPN: openvpn, chatDocId: chatDocId),
+            );
+          });
         }
 
         if (state is VpnDisconnectedState) {
