@@ -124,6 +124,12 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
     setState(() {
       status = vpnStatus;
     });
+    if (status!.connectedOn == null) {
+      final vpnbloc = BlocProvider.of<VpnBloc>(context);
+      vpnbloc.add(
+        VpnDisconnect(openVPN: openvpn, chatDocId: chatDocId),
+      );
+    }
   }
 
   void _onVpnStageChanged(VPNStage stage, String string) {
@@ -174,25 +180,25 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
           await Future.delayed(Duration(seconds: 4)).then((_) {
             EasyLoading.showSuccess('Все прошло успешно!');
           });
-          await AwesomeNotifications().createNotification(
-            content: NotificationContent(
-                id: 1,
-                locked: true,
-                channelKey: 'ghost_vpn_key',
-                title: 'GhostVPN',
-                body: 'Вы подключены к GhostVPN'),
-            actionButtons: <NotificationActionButton>[
-              NotificationActionButton(key: 'yes', label: 'Отключить'),
-            ],
-          );
-          AwesomeNotifications().actionStream.listen((event) {
-            print('event received!');
-            print(event.toMap().toString());
-            final vpnbloc = BlocProvider.of<VpnBloc>(context);
-            vpnbloc.add(
-              VpnDisconnect(openVPN: openvpn, chatDocId: chatDocId),
-            );
-          });
+          // await AwesomeNotifications().createNotification(
+          //   content: NotificationContent(
+          //       id: 1,
+          //       locked: true,
+          //       channelKey: 'ghost_vpn_key',
+          //       title: 'GhostVPN',
+          //       body: 'Вы подключены к GhostVPN'),
+          //   actionButtons: <NotificationActionButton>[
+          //     NotificationActionButton(key: 'yes', label: 'Отключить'),
+          //   ],
+          // );
+          // AwesomeNotifications().actionStream.listen((event) {
+          //   print('event received!');
+          //   print(event.toMap().toString());
+          //   final vpnbloc = BlocProvider.of<VpnBloc>(context);
+          //   vpnbloc.add(
+          //     VpnDisconnect(openVPN: openvpn, chatDocId: chatDocId),
+          //   );
+          // });
         }
 
         if (state is VpnDisconnectedState) {
