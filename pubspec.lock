@@ -33,14 +33,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.0"
-  awesome_notifications:
-    dependency: "direct main"
-    description:
-      name: awesome_notifications
-      sha256: "6482ced1a57d0cb7eaecafdeb8ac5ef8547dfd39e5e6af7b24e220b8fd888a6e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.21"
   bloc:
     dependency: transitive
     description:
@@ -89,6 +81,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  cladvpn_service:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "3ada54aba10e15c649fdb654e074e5945857554d"
+      url: "https://github.com/repfly/openvpn_flutter"
+    source: git
+    version: "1.2.0"
   cli_util:
     dependency: transitive
     description:
@@ -480,14 +481,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.2"
-  openvpn_flutter:
-    dependency: "direct main"
-    description:
-      name: openvpn_flutter
-      sha256: "1cf224ca744612293753e95897153ef40d73537b599fc8bcec60476f08c63ec6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.2"
   path:
     dependency: transitive
     description:

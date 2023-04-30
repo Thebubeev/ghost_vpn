@@ -34,7 +34,7 @@ class WelcomeCardWidget extends StatelessWidget {
           height: 4,
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 5, right: 5),
+          padding: const EdgeInsets.only(left: 7, right: 7),
           child: Text(options[index].subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(

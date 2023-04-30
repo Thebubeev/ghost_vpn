@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:cladvpn_service/openvpn_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ghost_vpn/api/yokassa_api.dart';
 import 'package:ghost_vpn/models/firebase_config.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:meta/meta.dart';
-import 'package:openvpn_flutter/openvpn_flutter.dart';
 import 'package:yookassa_payments_flutter/yookassa_payments_flutter.dart';
 
 part 'vpn_event.dart';
@@ -23,7 +24,10 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
         if (payment != null) {
           emit(VpnLoadingSubscriptionState());
           final yokassaPayment = await YokassaApi().makeYokassaPayment(
-              payment.token, event.title, event.value.toString());
+              payment.token,
+              event.title,
+              event.value.toString(),
+              FirebaseAuth.instance.currentUser!.email!);
           if (yokassaPayment != null && yokassaPayment.confirmation != null) {
             final confirmUrl =
                 Uri.parse(yokassaPayment.confirmation!.confirmationUrl!);
@@ -84,10 +88,6 @@ class VpnBloc extends Bloc<VpnEvent, VpnState> {
               .then((snapshot) async {
             if (snapshots.docs.isNotEmpty) {
               chatDocId = snapshot.docs.single.id;
-              // await collectionReference_configs
-              //     .doc(chatDocId)
-              //     .update({'active': FieldValue.increment(2)});
-
               DocumentReference documentReference = FirebaseFirestore.instance
                   .collection('configs')
                   .doc(chatDocId);

@@ -1,6 +1,5 @@
 import 'dart:async';
-
-import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:cladvpn_service/openvpn_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:ghost_vpn/services/local_notifications.dart';
 import 'package:ghost_vpn/widgets/container_speed_widget.dart';
 import 'package:ghost_vpn/widgets/drawer_vpn_main_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:openvpn_flutter/openvpn_flutter.dart';
 
 class VpnMainScreen extends StatefulWidget {
   const VpnMainScreen({Key? key}) : super(key: key);
@@ -46,7 +44,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
   @override
   void initState() {
     initializeDateFormatting();
-    listenNotificationStatus();
     checkPromoExpirationTime();
     timer = Timer.periodic(Duration(seconds: 50), (timer) async {
       await checkFields();
@@ -60,18 +57,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
         localizedDescription: "Ghost VPN");
 
     super.initState();
-  }
-
-  listenNotificationStatus() async {
-    AwesomeNotifications().actionStream.listen(
-      (ReceivedAction receivedAction) {
-        if (receivedAction.buttonKeyPressed == 'yes') {
-          BlocProvider.of<VpnBloc>(context)
-              .add(VpnDisconnect(openVPN: openvpn, chatDocId: chatDocConfigId));
-        }
-      
-      },
-    );
   }
 
   Future checkPromoExpirationTime() async {
@@ -104,7 +89,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             await LocalNotifications().showNotification(context);
             timer?.cancel();
             await users.doc(snapshot.docs.single.id).update({'isPromo': '1'});
-            Navigator.pushNamed(context, RoutesGenerator.SPLASH_SCREEN);
+            Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
           }
         });
       }
@@ -172,25 +157,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
           await Future.delayed(Duration(seconds: 4)).then((_) {
             EasyLoading.showSuccess('Все прошло успешно!');
           });
-          await AwesomeNotifications().createNotification(
-            content: NotificationContent(
-                id: 1,
-                locked: true,
-                channelKey: 'ghost_vpn_key',
-                title: 'GhostVPN',
-                body: 'Вы подключены к GhostVPN'),
-            actionButtons: <NotificationActionButton>[
-              NotificationActionButton(key: 'yes', label: 'Отключить'),
-            ],
-          );
-          AwesomeNotifications().actionStream.listen((event) {
-            print('event received!');
-            print(event.toMap().toString());
-            final vpnbloc = BlocProvider.of<VpnBloc>(context);
-            vpnbloc.add(
-              VpnDisconnect(openVPN: openvpn, chatDocId: chatDocId),
-            );
-          });
         }
 
         if (state is VpnDisconnectedState) {
@@ -199,7 +165,6 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
             stringStage = 'СТАРТ';
             isConnected = false;
           });
-          await AwesomeNotifications().dismiss(1);
         }
       },
       child: WillPopScope(
@@ -226,7 +191,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                         await auth.signOut();
                         timer?.cancel();
                         Navigator.pushNamed(
-                            context, RoutesGenerator.SPLASH_SCREEN);
+                            context, RoutesGenerator.WRAPPER);
                         print('User is out');
                       }
                     },
@@ -303,6 +268,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                                             chatDocId: chatDocConfigId))
                                   }
                                 : {
+                                    openvpn.requestPermissionAndroid(),
                                     BlocProvider.of<VpnBloc>(context)
                                         .add(VpnConnect(
                                       openVPN: openvpn,

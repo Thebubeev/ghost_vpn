@@ -31,7 +31,7 @@ class YokassaApi {
   }
 
   Future<YokassaPayment?> makeYokassaPayment(
-      String token, String descriptionOfOrder, String value) async {
+      String token, String descriptionOfOrder, String value, String email) async {
     final credentials =
         '203630:live_GJuV8iE5UsSJDrMXAdG0jwdUBrB5WaH7QC99rVGBE6I';
 
@@ -52,7 +52,19 @@ class YokassaApi {
                 "type": "redirect",
                 "return_url": "https://ddpub.ru/success"
               },
-              "description": descriptionOfOrder
+              "description": descriptionOfOrder,
+              "receipt": {
+                "customer": {"email": email},
+                "items": [
+                  {
+                    "description": descriptionOfOrder,
+                    "quantity": "1",
+                    "amount": {"value": value, "currency": "RUB"},
+                    "vat_code": "1"
+                  },
+                  
+                ]
+              }
             }));
     if (response.statusCode == 200) {
       return YokassaPayment.fromJson(jsonDecode(response.body));
