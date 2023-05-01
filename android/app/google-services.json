@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "989673027494-d3k5d8eujqit8f5co43pbnga6hr04diq.apps.googleusercontent.com",
+          "client_id": "989673027494-1thung18j93t8jd4e852gf4qneqiprmq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ghost.vpn.com",
+            "certificate_hash": "2660b76a3457b0f45074f39fe4860910325323da"
+          }
+        },
+        {
+          "client_id": "989673027494-34hld6jojaam80nfk6t7hbvspud1rvns.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "ghost.vpn.com",
@@ -22,11 +30,11 @@
           }
         },
         {
-          "client_id": "989673027494-n6bsbs7e7g2ui7d9g8ecno04456t1qgp.apps.googleusercontent.com",
+          "client_id": "989673027494-fvjkmifj2lgiqig31onhm3hne6sbcq4l.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "ghost.vpn.com",
-            "certificate_hash": "2660b76a3457b0f45074f39fe4860910325323da"
+            "certificate_hash": "c1b9626815b0a9c43df622766d9f0ffaea37fe4c"
           }
         },
         {
