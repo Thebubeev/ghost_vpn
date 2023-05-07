@@ -85,11 +85,11 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
           if (!mounted) return;
           promoExpirationTime = snapshot.docs.single.get('promoExpirationTime');
           isTimetoPay = await getTimeToPay(snapshot.docs.single.id);
-          if (isTimetoPay) {
+          if (isTimetoPay && FirebaseAuth.instance.currentUser != null) {
             await LocalNotifications().showNotification(context);
             timer?.cancel();
             await users.doc(snapshot.docs.single.id).update({'isPromo': '1'});
-            Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
+            Navigator.pushNamed(context, RoutesGenerator.SPLASH_SCREEN);
           }
         });
       }
@@ -190,8 +190,7 @@ class _VpnMainScreenState extends State<VpnMainScreen> {
                       } else {
                         await auth.signOut();
                         timer?.cancel();
-                        Navigator.pushNamed(
-                            context, RoutesGenerator.WRAPPER);
+                        Navigator.pushNamed(context, RoutesGenerator.WRAPPER);
                         print('User is out');
                       }
                     },

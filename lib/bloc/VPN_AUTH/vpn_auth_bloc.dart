@@ -45,7 +45,7 @@ class VpnAuthBloc extends Bloc<VpnAuthEvent, VpnAuthState> {
     });
     on<VpnForgotPasswordEvent>((event, emit) async {
       try {
-        await auth.resetPasswordUsingEmail(event.login);
+        await auth.resetPasswordUsingEmail(event.login.trim());
         emit(VpnAuthRecoveryPasswordState());
       } catch (error) {
         String _warning = 'Что-то прошло не так...';

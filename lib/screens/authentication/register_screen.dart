@@ -97,7 +97,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           height: 15,
                         ),
-                        TextFormPassField(passController: _passController, isLoginScreen: false,),
+                        TextFormPassField(
+                          passController: _passController,
+                          isLoginScreen: false,
+                        ),
                         SizedBox(
                           height: 15,
                         ),
@@ -148,13 +151,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           fontSize: 17),
                                     ),
                                     const SizedBox(
-                                      width: 5,
+                                      width: 6,
                                     ),
                                     Image.asset(
                                       'assets/google.png',
                                       fit: BoxFit.cover,
-                                      height: 30,
-                                      width: 30,
+                                      height: 25,
+                                      width: 25,
                                     )
                                   ],
                                 ),

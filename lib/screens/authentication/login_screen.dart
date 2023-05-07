@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ghost_vpn/bloc/VPN_AUTH/vpn_auth_bloc.dart';
-import 'package:ghost_vpn/config/router.dart';
 import 'package:ghost_vpn/screens/authentication/forget_screen.dart';
 import 'package:ghost_vpn/services/firebase_auth.dart';
 import 'package:ghost_vpn/widgets/loader_widget.dart';
@@ -108,7 +107,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(
                           height: 15,
                         ),
-                        TextFormPassField(passController: _passController, isLoginScreen: true,),
+                        TextFormPassField(
+                          passController: _passController,
+                          isLoginScreen: true,
+                        ),
                         SizedBox(
                           height: 30,
                         ),
@@ -153,13 +155,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                           fontSize: 17),
                                     ),
                                     const SizedBox(
-                                      width: 5,
+                                      width: 6,
                                     ),
                                     Image.asset(
                                       'assets/google.png',
                                       fit: BoxFit.cover,
-                                      height: 30,
-                                      width: 30,
+                                      height: 25,
+                                      width: 25,
                                     )
                                   ],
                                 ),

@@ -21,12 +21,15 @@ class _SplashStartScreenState extends State<SplashStartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Image.network(
-          'https://firebasestorage.googleapis.com/v0/b/ghostvpn-ea207.appspot.com/o/documents%2F%D0%B2%D0%B5%D0%B1%20%D0%B8%D0%BA%D0%BE%D0%BD%D0%BA%D0%B0.jpg?alt=media&token=212b0652-12fb-428a-83a6-1697608d4da4',
-          fit: BoxFit.cover,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Image.network(
+            'https://firebasestorage.googleapis.com/v0/b/ghostvpn-ea207.appspot.com/o/documents%2F%D0%B2%D0%B5%D0%B1%20%D0%B8%D0%BA%D0%BE%D0%BD%D0%BA%D0%B0.jpg?alt=media&token=212b0652-12fb-428a-83a6-1697608d4da4',
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
